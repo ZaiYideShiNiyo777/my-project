@@ -561,6 +561,22 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
     }
   };
 
+  // 「导出数据」:下载当前全部数据为 JSON 文件,用于同步到 Git 源码后重新部署
+  const handleExport = () => {
+    const json = JSON.stringify(draft, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    a.href = url;
+    a.download = `portfolio-data-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   // 「完成」:数据为自动保存,此处仅提示保存结果,不关闭面板
   const handleDone = () => {
     setSavedAt(new Date());
@@ -598,6 +614,13 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              className="admin-btn-ghost"
+              onClick={handleExport}
+              title="下载全部数据(JSON),同步到 Git 源码后重新部署即可让所有访客看到"
+            >
+              导出数据
+            </button>
             <button className="admin-btn-ghost" onClick={handleReset}>
               恢复默认
             </button>
