@@ -63,3 +63,31 @@ python -m http.server 3000
 ```
 
 浏览器访问 `http://localhost:3000`,导航栏点「管理」输入口令即可进入后台编辑。
+
+## 部署上线(GitHub Pages)
+
+在线地址:**https://zaiyideshiniyo777.github.io/my-project/**
+
+部署采用 **gh-pages 分支**方案:构建产物 `dist/` 同步到 `gh-pages` 分支根目录,由 GitHub Pages 托管(仓库已公开)。
+
+### 一键部署(推荐)
+
+```powershell
+# 构建 + 提交 dist 到 main + 同步 gh-pages 并推送
+powershell -ExecutionPolicy Bypass -File deploy.ps1
+
+# 直连不通时走代理
+powershell -ExecutionPolicy Bypass -File deploy.ps1 -UseProxy
+```
+
+执行后等待 1~3 分钟 Pages 构建刷新,线上即生效。
+
+## 后台数据同步到 Git(重要)
+
+后台管理的所有修改只保存在**当前浏览器的 localStorage**,不会自动进 Git,访客看到的是 `src/data/resume.js` 中的默认数据。要让新内容对所有访客生效,需按以下闭环操作:
+
+1. **后台导出**:进入后台 → 顶部点「导出数据」,下载 `portfolio-data-日期.json`
+2. **更新源码**:将 JSON 中对应字段(如 `projects`)合并到 `src/data/resume.js`
+3. **重新部署**:运行 `deploy.ps1`,1~3 分钟后线上生效
+
+> 注意:后台中作品填的是图片/视频 URL;本地图片需先上传到图床或仓库,再填入链接。
