@@ -46,6 +46,15 @@ portfolio/
 └── 打开我的作品集.bat          # 一键启动脚本
 ```
 
+## 更新与上线指南
+
+**完整可独立执行的更新/上线操作指南见 [UPDATE_GUIDE.md](./UPDATE_GUIDE.md)**,覆盖:
+
+- 路径 A:后台改数据 → 「导出数据」→ `sync-data.ps1` 同步源码 → 部署
+- 路径 B:改源码/素材 → `npm run build` → `deploy.ps1` 部署
+- 验证方法(bundle hash / Pages 构建状态 / 无痕窗口)
+- 素材上传(图床 / 仓库)与标准操作清单
+
 ## 快速开始
 
 ```bash
