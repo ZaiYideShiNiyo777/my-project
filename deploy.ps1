@@ -25,6 +25,13 @@ Write-Host '==> 1/4 npm run build'
 npm run build
 if ($LASTEXITCODE -ne 0) { Write-Host 'BUILD FAILED'; exit 1 }
 
+# copy project assets/ (videos, images) into dist/assets so they ship with the site
+if (Test-Path 'assets') {
+  Write-Host '==> 1b/4 copy assets -> dist/assets'
+  New-Item -ItemType Directory -Force -Path 'dist\assets' | Out-Null
+  Copy-Item -Path 'assets\*' -Destination 'dist\assets\' -Recurse -Force
+}
+
 Write-Host '==> 2/4 commit dist on main'
 git add dist
 git commit -m 'build: update dist' 2>$null | Out-Null

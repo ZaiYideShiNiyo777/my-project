@@ -63,10 +63,14 @@ function ColorField({ label, value, onChange }) {
 
 /* ---------- 媒体上传:本地文件转 base64 内嵌,或手动填 URL ---------- */
 // 数据会存 localStorage(约 5MB)并随导出 JSON / resume.js / 构建产物全链路流转,
-// 过大 base64 会导致存储溢出、导出臃肿、构建产物膨胀,因此设严格上限;
-// 超限时阻止上传并提示改用图床 URL 或仓库相对路径(见 UPDATE_GUIDE.md 第 6 节)
-const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
-const MAX_VIDEO_BYTES = 3 * 1024 * 1024; // 3MB(base64 再膨胀约 1/3)
+// 因此采用两层限制:
+//   1) 内嵌安全阈值(EMBED_*):超过则不转 base64——直接内嵌会撑爆存储与构建链路,
+//      改为提示把文件放到项目 assets/ 目录,src 填相对路径(或图床 URL)
+//   2) 硬上限(MAX_*):超过则拒绝上传,提示改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 图片硬上限 10MB
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 视频硬上限 100MB
+const EMBED_IMAGE_BYTES = 2 * 1024 * 1024; // 图片超过 2MB 不内嵌(建议放 assets/ 相对路径)
+const EMBED_VIDEO_BYTES = 3 * 1024 * 1024; // 视频超过 3MB 不内嵌(建议放 assets/ 相对路径)
 const IMAGE_ACCEPT = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 const VIDEO_ACCEPT = ['video/mp4', 'video/webm'];
 
@@ -86,12 +90,22 @@ function MediaUploadField({ type, value, onChange }) {
       return;
     }
     const limit = isImage ? MAX_IMAGE_BYTES : MAX_VIDEO_BYTES;
+    const embedLimit = isImage ? EMBED_IMAGE_BYTES : EMBED_VIDEO_BYTES;
     const mb = (file.size / 1024 / 1024).toFixed(1);
     if (file.size > limit) {
       setErr(
         isImage
-          ? `图片 ${mb}MB 超过 2MB 上限,请压缩后再上传;或改用图床 URL / 仓库相对路径(见 UPDATE_GUIDE.md 第 6 节)`
-          : `视频 ${mb}MB 超过 3MB 上限。内嵌视频会使导出 JSON / 源码 / 构建产物显著变大,建议改用图床 URL 或仓库相对路径`
+          ? `图片 ${mb}MB 超过 10MB 上限。请压缩后再上传,或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节方案二)`
+          : `视频 ${mb}MB 超过 100MB 上限。请改用图床 URL(见 UPDATE_GUIDE.md 第 6 节方案二)`
+      );
+      return;
+    }
+    if (file.size > embedLimit) {
+      // 大文件不转 base64:会撑爆 localStorage(约 5MB)及导出 / 同步 / 构建整条链路
+      setErr(
+        isImage
+          ? `图片 ${mb}MB 超过内嵌安全上限(2MB)。请把文件放到项目 assets/ 目录,src 填相对路径(如 assets/images/xxx.jpg);或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
+          : `视频 ${mb}MB 超过内嵌安全上限(3MB)。请把文件放到项目 assets/videos/ 目录,src 填相对路径(如 assets/videos/xxx.mp4);或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
       );
       return;
     }
@@ -125,7 +139,11 @@ function MediaUploadField({ type, value, onChange }) {
             type="button"
             className="admin-btn-ghost !py-1 !px-2 text-xs whitespace-nowrap"
             onClick={() => fileRef.current && fileRef.current.click()}
-            title={isImage ? '从本地选择图片,自动转内嵌(≤2MB)' : '从本地选择视频,自动转内嵌(≤3MB)'}
+            title={
+              isImage
+                ? '从本地选择图片:≤2MB 自动转内嵌;更大文件请放项目 assets/ 目录后填相对路径(上限 10MB)'
+                : '从本地选择视频:≤3MB 自动转内嵌;更大文件请放项目 assets/videos/ 目录后填相对路径(上限 100MB)'
+            }
           >
             上传文件
           </button>
@@ -401,7 +419,7 @@ function ProjectsTab({ data, onChange }) {
           {/* 媒体文件编辑 */}
           <div className="border-t border-gray-800 pt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-500">媒体文件(可上传本地文件自动转内嵌,或粘贴图床 URL;点击卡片弹窗中展示)</p>
+              <p className="text-xs text-gray-500">媒体文件(≤2MB 图片 / ≤3MB 视频可上传转内嵌;大文件放项目 assets/ 目录填相对路径,或粘贴图床 URL;点击卡片弹窗中展示)</p>
               <button
                 className="admin-btn-add !py-1 !px-2 text-xs"
                 onClick={() =>

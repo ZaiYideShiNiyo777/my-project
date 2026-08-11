@@ -40,6 +40,7 @@ portfolio/
 │       ├── AuthGate.jsx        # 管理口令验证层
 │       └── AdminPanel.jsx      # 后台管理面板
 ├── dist/                       # 构建产物(部署用)
+├── assets/                      # 静态素材(视频/图片,deploy 自动复制到 dist/assets)
 ├── index.html                  # 页面模板
 ├── webpack.config.js           # 构建配置(dev 端口 3001)
 ├── tailwind.config.js          # 主题配置(primary/accent 颜色)
@@ -99,4 +100,4 @@ powershell -ExecutionPolicy Bypass -File deploy.ps1 -UseProxy
 2. **更新源码**:将 JSON 中对应字段(如 `projects`)合并到 `src/data/resume.js`
 3. **重新部署**:运行 `deploy.ps1`,1~3 分钟后线上生效
 
-> 后台作品媒体支持**直接上传本地文件**:点「地址 src」旁的「上传文件」按钮,图片(≤2MB)与视频(≤3MB)自动转为内嵌格式并显示预览;更大素材(如大视频)仍建议先传图床或仓库再填 URL,详见 [UPDATE_GUIDE.md](./UPDATE_GUIDE.md) 第 6 节。
+> 后台作品媒体支持**直接上传本地文件**:点「地址 src」旁的「上传文件」按钮,图片(≤2MB)与视频(≤3MB)自动转为内嵌格式并显示预览(硬上限:图片 10MB、视频 100MB);更大的文件**不会转内嵌**(避免撑爆 localStorage 与构建链路),请把文件放到项目 `assets/` 目录后填相对路径,或先传图床再填 URL,详见 [UPDATE_GUIDE.md](./UPDATE_GUIDE.md) 第 6 节。
