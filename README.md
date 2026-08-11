@@ -53,7 +53,7 @@ portfolio/
 - 路径 A:后台改数据 → 「导出数据」→ `sync-data.ps1` 同步源码 → 部署
 - 路径 B:改源码/素材 → `npm run build` → `deploy.ps1` 部署
 - 验证方法(bundle hash / Pages 构建状态 / 无痕窗口)
-- 素材上传(图床 / 仓库)与标准操作清单
+- 素材上传(后台直接上传本地文件 / 图床 / 仓库)与标准操作清单
 
 ## 快速开始
 
@@ -99,4 +99,4 @@ powershell -ExecutionPolicy Bypass -File deploy.ps1 -UseProxy
 2. **更新源码**:将 JSON 中对应字段(如 `projects`)合并到 `src/data/resume.js`
 3. **重新部署**:运行 `deploy.ps1`,1~3 分钟后线上生效
 
-> 注意:后台中作品填的是图片/视频 URL;本地图片需先上传到图床或仓库,再填入链接。
+> 后台作品媒体支持**直接上传本地文件**:点「地址 src」旁的「上传文件」按钮,图片(≤2MB)与视频(≤3MB)自动转为内嵌格式并显示预览;更大素材(如大视频)仍建议先传图床或仓库再填 URL,详见 [UPDATE_GUIDE.md](./UPDATE_GUIDE.md) 第 6 节。
