@@ -42,14 +42,18 @@ Write-Host '==> 3/4 sync dist to gh-pages branch'
 if ($LASTEXITCODE -ne 0) { Write-Host 'FETCH FAILED - check network or use -UseProxy'; exit 1 }
 if (Test-Path '.deploy-tmp') { & git @GIT worktree remove '.deploy-tmp' --force 2>$null }
 & git @GIT worktree add '.deploy-tmp' origin/gh-pages
+# 先清空 worktree(保留 .git),再整体复制 dist,确保 dist 中已删除的文件不会残留在站点
+Get-ChildItem -Path '.deploy-tmp' -Force | Where-Object { $_.Name -ne '.git' } | Remove-Item -Recurse -Force
 Copy-Item -Path 'dist\*' -Destination '.deploy-tmp\' -Recurse -Force
 & git @GIT -C '.deploy-tmp' add -A
 & git @GIT -C '.deploy-tmp' commit -m 'deploy: update site' 2>$null | Out-Null
 & git @GIT -C '.deploy-tmp' push origin HEAD:gh-pages
+if ($LASTEXITCODE -ne 0) { Write-Host 'GH-PAGES PUSH FAILED - check network or use -UseProxy'; exit 1 }
 & git @GIT worktree remove '.deploy-tmp' --force
 
 Write-Host '==> 4/4 push main'
 & git @GIT push origin main
+if ($LASTEXITCODE -ne 0) { Write-Host 'MAIN PUSH FAILED - check network or use -UseProxy'; exit 1 }
 
 Write-Host ''
 Write-Host 'Done! Live at https://zaiyideshiniyo777.github.io/my-project/'

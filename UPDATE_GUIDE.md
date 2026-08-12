@@ -14,7 +14,7 @@
 | `src/data/resumeStore.js` | 数据存储层 + 管理口令(`ADMIN_PASS`) | 可改口令,改后需重新构建 |
 | `dist/` | 构建产物(部署的就是它) | **永远不要手改**,会被 `npm run build` 覆盖 |
 
-**核心原理**:后台「管理」改的数据只存在你**当前浏览器的 localStorage**,访客看不到。要让所有访客看到新内容,必须走一遍:**导出 JSON → 同步进 resume.js → 构建 → 部署**。
+**核心原理**:后台「管理」改的数据只存在你**当前浏览器的 localStorage**,访客看不到。要让所有访客看到新内容,必须走一遍:**导出数据(JSON 或 ZIP)→ 同步进 resume.js → 构建 → 部署**。ZIP 仅在后台上传过大文件素材时才会生成,内含素材文件,同步脚本会自动解压到项目 `assets/`。
 
 ---
 
@@ -23,21 +23,21 @@
 ### Step 1 · 在后台修改数据
 
 1. 浏览器打开公网地址 → 导航栏点「管理」→ 输入口令进入后台
-2. 在五个 Tab 中修改作品 / 技能 / 个人信息等(修改**自动保存**,无需点「完成」);作品媒体文件可直接上传本地图片/小视频,见第 6 节方案一
-3. 点右上角「**导出数据**」→ 浏览器下载 `portfolio-data-日期.json`
+2. 在五个 Tab 中修改作品 / 技能 / 个人信息等(修改**自动保存**,无需点「完成」);作品媒体文件可直接上传本地图片/视频,系统自动处理,见第 6 节方案一
+3. 点右上角「**导出数据**」→ 浏览器下载 `portfolio-data-日期.json`;**若上传过大文件素材则下载 `portfolio-data-日期.zip`**
 
 ### Step 2 · 同步到源码
 
-1. 把下载的 `portfolio-data-日期.json` 复制到项目根目录(可改名为 `portfolio-data.json` 方便记忆)
+1. 把下载的 `portfolio-data-日期.json`(或 **`.zip`**)复制到项目根目录(可改名为 `portfolio-data.json` / `portfolio-data.zip` 方便记忆)
 2. 打开 PowerShell,执行:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File D:\AI\AI_Porject\Resume\portfolio\sync-data.ps1 D:\AI\AI_Porject\Resume\portfolio\portfolio-data.json
+powershell -ExecutionPolicy Bypass -File D:\AI\AI_Porject\Resume\portfolio\sync-data.ps1 D:\AI\AI_Porject\Resume\portfolio\portfolio-data.zip
 ```
 
-3. 看到 `OK: 已写入 ...\src\data\resume.js` 即成功
+3. 看到 `OK: 已写入 ...\src\data\resume.js` 即成功;**zip 包会自动解压:素材复制到项目 `assets/`(随部署上传 GitHub),数据写入 resume.js**
 
-> 同步脚本做的事:校验 JSON 的 11 个数据键 → 整体重写 `src/data/resume.js`(ES module 格式)→ 不碰其他任何文件。**数据落盘位置是 `src/data/resume.js`**,它在 `src/` 下属于源码,构建时被读取、不会被覆盖;而 `dist/` 每次构建都会重新生成,改在 `dist/` 里的任何内容都会丢失。
+> 同步脚本做的事:校验 JSON 的 11 个数据键 → 整体重写 `src/data/resume.js`(ES module 格式)→ 不碰其他任何文件;传入 zip 时先自动解压,把 `assets/` 素材复制到项目根目录再同步。**数据落盘位置是 `src/data/resume.js`**,它在 `src/` 下属于源码,构建时被读取、不会被覆盖;而 `dist/` 每次构建都会重新生成,改在 `dist/` 里的任何内容都会丢失。
 
 ### Step 3 · 构建并部署上线
 
@@ -151,36 +151,34 @@ curl.exe -s https://zaiyideshiniyo777.github.io/my-project/ | findstr bundle
 
 ## 6. 素材上传(作品图片 / 视频)
 
-后台「项目作品」→ 单个项目 → 媒体文件,提供两种来源:**直接上传本地文件**(自动转内嵌)或**填 URL**。按文件大小选择:小文件直接上传最省事,大文件用相对路径或 URL。
+后台「项目作品」→ 单个项目 → 媒体文件,支持**直接从本地选择文件上传**图片和视频,上传后自动填充 src 并显示预览(图片缩略图 / 视频播放器)。按文件大小自动选择处理方式,全程无需手动填路径。
 
-### 方案一:后台直接上传本地文件(仅限小文件)
+### 方案一:后台直接上传本地文件(推荐,全自动)
 
-1. 后台「项目作品」→ 该项目 → 媒体文件 → 类型选「图片/视频」→ 点「地址 src」旁的 **「上传文件」** 按钮
-2. 图片:选择本地 jpg / png / gif / webp / svg,自动读取为 base64 内嵌格式填入 src,并在下方显示缩略图预览
-3. 视频:选择本地 mp4 / webm,同样转内嵌(有播放器预览)
-4. 大小规则(上传时会拦截并给出中文提示):
-   - **图片 ≤ 2MB、视频 ≤ 3MB**:自动转 base64 内嵌,随导出 JSON 一起上线
-   - **图片 2MB~10MB、视频 3MB~100MB**:**不会**转内嵌——数据要存 localStorage(约 5MB)并随导出 JSON / 同步源码 / 构建产物全链路流转,直接内嵌会撑爆存储与构建链路;上传会被拦截,请改用下方的相对路径或图床 URL
-   - **超过 10MB(图片)/ 100MB(视频)**:拒绝上传,请压缩或改用图床 URL
-5. 填入后仍可手动编辑 src 文本框;之后照常走路径 A(导出数据 → 同步 → 部署),内嵌内容会随 JSON 一起上线
+1. 后台「项目作品」→ 该项目 → 媒体文件 → 类型选「图片/视频」→ 点「地址 src」旁的 **「上传文件」** 按钮,从本地选择文件
+2. 系统按大小自动处理(图片 jpg/png/gif/webp/svg,视频 mp4/webm):
+   - **图片 ≤2MB、视频 ≤3MB**:自动转 base64 内嵌,随导出 JSON 直接上线
+   - **图片 2MB~10MB、视频 3MB~100MB**:自动暂存到浏览器(IndexedDB,容量远大于 localStorage),src **自动填相对路径**(`assets/images/原名` / `assets/videos/原名`),下方立即显示预览
+   - **超过 10MB(图片)/ 100MB(视频)**:拒绝上传,请压缩后重试或改用图床 URL
+3. 上传大文件后,点「导出数据」会下载 **zip 包**(数据 + 素材);把 zip 直接交给同步脚本,素材自动落到项目 `assets/`,随后构建部署,素材随站点一起上线(公网地址为 `https://zaiyideshiniyo777.github.io/my-project/assets/...`)
+4. 小文件导出的是纯 JSON,与原来流程完全一致
 
-### 方案二:图床 / 直链 URL(推荐大文件、大量图片)
+> 大文件(>2MB 图 / >3MB 视频)不会转 base64——数据存 localStorage(约 5MB)并随导出 / 同步 / 构建全链路流转,内嵌会撑爆存储与构建链路;改为「浏览器暂存 + 导出打包 + 同步落盘」后,src 里只有相对路径字符串,数据链路完全不受影响。
+
+### 方案二:图床 / 直链 URL(可选)
 
 1. 把图片上传到免费图床(如 sm.ms、imgur),视频上传到可直链的存储(如 GitHub 仓库 raw 链接、对象存储)
 2. 后台「地址 src」粘贴完整 `https://...` URL(视频可另填 `poster` 封面图)
 3. 先在自己浏览器里打开该 URL 确认能显示,再走路径 A 同步上线
 
-### 方案三:放仓库(相对路径)——大视频 / 大图片的推荐方式
+### 方案三:手动放仓库(不用后台上传时)
 
 1. 把文件复制到项目根目录 `assets/` 下(视频建议 `assets/videos/`,图片 `assets/images/`),例如 `assets/videos/恒大液压.mp4`
-2. **无需手动拷贝到 dist**:`deploy.ps1` 构建后会自动把 `assets/` 复制到 `dist/assets/` 并随站点发布
-3. 后台「地址 src」填相对路径:`assets/videos/恒大液压.mp4`
-4. 上线后访问地址为 `https://zaiyideshiniyo777.github.io/my-project/assets/videos/恒大液压.mp4`(index.html 与资源同目录,相对路径自动解析到正确子路径)
-5. 素材文件随部署自动提交入库(deploy.ps1 的 `git add dist` 会带上 `dist/assets`);源文件 `assets/` 也在 Git 中保留
+2. 后台「地址 src」填相对路径:`assets/videos/恒大液压.mp4`(无需手动拷贝到 dist,`deploy.ps1` 会自动把 `assets/` 复制到 `dist/assets/`)
+3. 上线后访问地址为 `https://zaiyideshiniyo777.github.io/my-project/assets/videos/恒大液压.mp4`
+4. 素材文件随部署自动提交入库(deploy.ps1 的 `git add dist` 会带上 `dist/assets`);源文件 `assets/` 也在 Git 中保留
 
-> 何时建议用 URL / 相对路径而不是直接上传:视频超过 3MB、一个项目多个视频、图片超过 2MB 或数量多、素材后续可能要换——内嵌方式数据体积大,且更新素材要重新同步全量数据。
-
-> 检查素材是否可用:部署后直接浏览器访问素材的完整 URL,能打开图片/播放视频即成功。
+> 何时用方案二/三而不是直接上传:素材后续经常要换、文件超过硬上限(10MB/100MB)、不想让素材进入 GitHub 仓库等场景。
 
 ---
 
@@ -191,9 +189,9 @@ curl.exe -s https://zaiyideshiniyo777.github.io/my-project/ | findstr bundle
 | # | 操作 | 命令 / 动作 |
 |---|---|---|
 | 1 | 公网打开后台改数据 | 管理 → 口令 → 修改(自动保存) |
-| 2 | 导出 | 点「导出数据」→ 得到 json 文件 |
-| 3 | 放文件 | json 复制到项目根目录,改名 `portfolio-data.json` |
-| 4 | 同步 | `powershell -ExecutionPolicy Bypass -File D:\AI\AI_Porject\Resume\portfolio\sync-data.ps1 D:\AI\AI_Porject\Resume\portfolio\portfolio-data.json` |
+| 2 | 导出 | 点「导出数据」→ 得到 json(**上传过大文件素材时为 zip**) |
+| 3 | 放文件 | 复制到项目根目录,改名 `portfolio-data.json` / `portfolio-data.zip` |
+| 4 | 同步 | `powershell -ExecutionPolicy Bypass -File D:\AI\AI_Porject\Resume\portfolio\sync-data.ps1 D:\AI\AI_Porject\Resume\portfolio\portfolio-data.zip`(zip 自动解压素材到 assets/) |
 | 5 | 部署 | `powershell -ExecutionPolicy Bypass -File D:\AI\AI_Porject\Resume\portfolio\deploy.ps1`(网络不通加 `-UseProxy`) |
 | 6 | 等构建 | 1~3 分钟 |
 | 7 | 查状态 | `gh api repos/ZaiYideShiNiyo777/my-project/pages/builds/latest --jq '.status'` → 应为 `built` |
@@ -214,7 +212,9 @@ curl.exe -s https://zaiyideshiniyo777.github.io/my-project/ | findstr bundle
 
 ## 8. 常见问题
 
-- **后台怎么上传本地图片/视频?** 项目作品 → 媒体文件 → 「地址 src」旁点「上传文件」,图片 ≤2MB、视频 ≤3MB 自动转内嵌(图片硬上限 10MB、视频 100MB);更大的文件**不会转内嵌**,请放到项目 `assets/` 目录后填相对路径,或用图床 URL(见第 6 节)
+- **后台怎么上传本地图片/视频?** 项目作品 → 媒体文件 → 「地址 src」旁点「上传文件」直接选文件即可:≤2MB 图片 / ≤3MB 视频自动内嵌;更大的自动暂存浏览器并填相对路径,导出 zip 交给同步脚本,素材自动进项目 `assets/` 随部署上线(图片硬上限 10MB、视频 100MB,见第 6 节)
+- **导出下载的是 zip 而不是 json?** 说明你上传过大文件素材(已暂存浏览器)。zip 内含数据 + 素材,同步脚本(sync-data.ps1)直接处理 zip 即可,会自动把素材解压到项目 `assets/`
+- **后台预览素材正常,但访客看不到?** 大文件素材还在你浏览器里,未走同步部署:把导出的 zip 交给同步脚本(清单 A 第 4 步)后再部署,素材随 `assets/` 上传 GitHub 上线
 - **改完线上没变化?** 等 1~3 分钟构建完成;`Ctrl+F5` 强刷(清缓存);用无痕窗口验证
 - **访客看不到我后台改的数据?** 没走同步流程——后台数据只在你浏览器 localStorage,必须执行清单 A 的 4/5 步
 - **忘记管理口令?** 编辑 `src/data/resumeStore.js` 的 `ADMIN_PASS` → 重新构建部署(清单 B)

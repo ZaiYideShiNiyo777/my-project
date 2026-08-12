@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { defaultData } from '../data/resumeStore';
+import { saveMediaBlob, getMediaBlob, deleteMediaBlob } from '../utils/mediaStore';
+import { makeZip } from '../utils/zip';
 
 // ============================================================
 // 后台管理面板
@@ -61,25 +63,71 @@ function ColorField({ label, value, onChange }) {
   );
 }
 
-/* ---------- 媒体上传:本地文件转 base64 内嵌,或手动填 URL ---------- */
+/* ---------- 媒体上传:本地文件自动处理,或手动填 URL ---------- */
 // 数据会存 localStorage(约 5MB)并随导出 JSON / resume.js / 构建产物全链路流转,
-// 因此采用两层限制:
-//   1) 内嵌安全阈值(EMBED_*):超过则不转 base64——直接内嵌会撑爆存储与构建链路,
-//      改为提示把文件放到项目 assets/ 目录,src 填相对路径(或图床 URL)
-//   2) 硬上限(MAX_*):超过则拒绝上传,提示改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)
+// 因此按文件大小分三档:
+//   1) 内嵌安全阈值(EMBED_*)内:自动转 base64 内嵌,随 JSON 全链路流转
+//   2) 阈值以上、硬上限(MAX_*)内:不转 base64,自动暂存浏览器 IndexedDB(容量远大于
+//      localStorage),src 自动填相对路径(assets/images|videos/原名),预览正常;
+//      「导出数据」打包为 zip,同步脚本解压后素材落到项目 assets/,随部署自动上线
+//   3) 超过硬上限:拒绝上传,提示压缩或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 图片硬上限 10MB
 const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 视频硬上限 100MB
-const EMBED_IMAGE_BYTES = 2 * 1024 * 1024; // 图片超过 2MB 不内嵌(建议放 assets/ 相对路径)
-const EMBED_VIDEO_BYTES = 3 * 1024 * 1024; // 视频超过 3MB 不内嵌(建议放 assets/ 相对路径)
+const EMBED_IMAGE_BYTES = 2 * 1024 * 1024; // 图片超过 2MB 不内嵌(改走 IndexedDB 暂存)
+const EMBED_VIDEO_BYTES = 3 * 1024 * 1024; // 视频超过 3MB 不内嵌(改走 IndexedDB 暂存)
 const IMAGE_ACCEPT = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
 const VIDEO_ACCEPT = ['video/mp4', 'video/webm'];
+const ASSET_IMAGE_DIR = 'assets/images/'; // 大图片相对路径目录(发布时随 assets/ 上传 GitHub)
+const ASSET_VIDEO_DIR = 'assets/videos/'; // 大视频相对路径目录
+// 以 assets/ 开头的 src:素材随仓库 assets/ 发布;若同时在 IndexedDB 有暂存,导出时会打包
+const isAssetPath = (v) => typeof v === 'string' && v.indexOf('assets/') === 0;
+
+// 释放一批媒体条目在浏览器中的暂存文件(删除/改写 src 时调用,尽力而为)
+function releaseMedia(media) {
+  (media || []).forEach((m) => {
+    if (isAssetPath(m.src)) deleteMediaBlob(m.src);
+  });
+}
+
+// 触发浏览器下载 Blob 文件
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 function MediaUploadField({ type, value, onChange }) {
   const fileRef = useRef(null);
   const [err, setErr] = useState('');
+  const [info, setInfo] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(''); // IndexedDB 暂存文件的 blob 预览地址
   const isImage = type !== 'video';
 
-  const handleFile = (e) => {
+  // 相对路径素材:优先取 IndexedDB 暂存文件预览(未部署时也能看到);取不到则按 src 直接加载
+  useEffect(() => {
+    let url = '';
+    let cancelled = false;
+    if (isAssetPath(value)) {
+      getMediaBlob(value)
+        .then((blob) => {
+          if (cancelled || !blob) return;
+          url = URL.createObjectURL(blob);
+          setPreviewUrl(url);
+        })
+        .catch(() => {});
+    }
+    return () => {
+      cancelled = true;
+      if (url) URL.revokeObjectURL(url);
+    };
+  }, [value]);
+
+  const handleFile = async (e) => {
     const file = e.target.files && e.target.files[0];
     e.target.value = ''; // 清空 value,允许再次选择同一文件
     if (!file) return;
@@ -95,31 +143,44 @@ function MediaUploadField({ type, value, onChange }) {
     if (file.size > limit) {
       setErr(
         isImage
-          ? `图片 ${mb}MB 超过 10MB 上限。请压缩后再上传,或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节方案二)`
-          : `视频 ${mb}MB 超过 100MB 上限。请改用图床 URL(见 UPDATE_GUIDE.md 第 6 节方案二)`
+          ? `图片 ${mb}MB 超过 10MB 上限。请压缩后再上传,或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
+          : `视频 ${mb}MB 超过 100MB 上限。请改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
       );
       return;
     }
     if (file.size > embedLimit) {
-      // 大文件不转 base64:会撑爆 localStorage(约 5MB)及导出 / 同步 / 构建整条链路
-      setErr(
-        isImage
-          ? `图片 ${mb}MB 超过内嵌安全上限(2MB)。请把文件放到项目 assets/ 目录,src 填相对路径(如 assets/images/xxx.jpg);或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
-          : `视频 ${mb}MB 超过内嵌安全上限(3MB)。请把文件放到项目 assets/videos/ 目录,src 填相对路径(如 assets/videos/xxx.mp4);或改用图床 URL(见 UPDATE_GUIDE.md 第 6 节)`
-      );
+      // 大文件不转 base64:自动暂存浏览器 IndexedDB(容量远大于 localStorage),
+      // src 自动填相对路径,导出时打包,发布时随 assets/ 自动上传 GitHub 上线
+      const src = (isImage ? ASSET_IMAGE_DIR : ASSET_VIDEO_DIR) + file.name;
+      try {
+        await saveMediaBlob(src, file);
+        setErr('');
+        setInfo(`✓ 已暂存(${mb}MB),src 已自动填入相对路径;「导出数据」会自动打包该文件,同步后随站点上线`);
+        onChange(src);
+      } catch (e) {
+        setErr('浏览器暂存大文件失败(可能处于隐私/无痕模式),请改用小文件内嵌,或图床 URL(见 UPDATE_GUIDE.md 第 6 节)');
+      }
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
       setErr('');
+      setInfo('');
       onChange(reader.result); // base64 data URI,直接写入 src
     };
     reader.onerror = () => setErr('文件读取失败,请重试');
     reader.readAsDataURL(file);
   };
 
+  // src 被改写时,同步释放旧路径的暂存文件
+  const handleSrcChange = (v) => {
+    if (v !== value && isAssetPath(value)) deleteMediaBlob(value);
+    onChange(v);
+  };
+
   const isDataUri = typeof value === 'string' && value.indexOf('data:') === 0;
+  const isAsset = isAssetPath(value);
 
   return (
     <div>
@@ -130,8 +191,8 @@ function MediaUploadField({ type, value, onChange }) {
             rows={1}
             label="地址 src"
             value={value}
-            onChange={onChange}
-            placeholder="粘贴 https://... 或 assets/xxx.jpg,或点右侧「上传文件」"
+            onChange={handleSrcChange}
+            placeholder="点右侧「上传文件」自动填充;或粘贴 https:// 图床 URL"
           />
         </div>
         <div className="pt-[1.15rem] flex-shrink-0">
@@ -141,8 +202,8 @@ function MediaUploadField({ type, value, onChange }) {
             onClick={() => fileRef.current && fileRef.current.click()}
             title={
               isImage
-                ? '从本地选择图片:≤2MB 自动转内嵌;更大文件请放项目 assets/ 目录后填相对路径(上限 10MB)'
-                : '从本地选择视频:≤3MB 自动转内嵌;更大文件请放项目 assets/videos/ 目录后填相对路径(上限 100MB)'
+                ? '从本地选择图片:≤2MB 自动内嵌;2MB~10MB 自动暂存并填相对路径,发布时随 assets/ 上线'
+                : '从本地选择视频:≤3MB 自动内嵌;3MB~100MB 自动暂存并填相对路径,发布时随 assets/ 上线'
             }
           >
             上传文件
@@ -157,14 +218,18 @@ function MediaUploadField({ type, value, onChange }) {
         </div>
       </div>
       {err && <p className="text-xs text-red-400 mt-1">{err}</p>}
+      {info && <p className="text-xs text-emerald-400 mt-1">{info}</p>}
       {value ? (
         <div className="mt-2">
           {isDataUri && (
             <p className="text-xs text-emerald-400 mb-1">✓ 已内嵌到数据中,导出 JSON / 同步上线时自动携带</p>
           )}
+          {isAsset && previewUrl && (
+            <p className="text-xs text-emerald-400 mb-1">✓ 素材已暂存于浏览器,导出数据时自动打包;发布时随 assets/ 上传 GitHub</p>
+          )}
           {isImage ? (
             <img
-              src={value}
+              src={previewUrl || value}
               alt="图片预览"
               className="max-h-24 rounded border border-gray-700"
               onError={(e) => {
@@ -172,7 +237,7 @@ function MediaUploadField({ type, value, onChange }) {
               }}
             />
           ) : (
-            <video src={value} controls className="max-h-24 rounded border border-gray-700" />
+            <video src={previewUrl || value} controls className="max-h-24 rounded border border-gray-700" />
           )}
         </div>
       ) : null}
@@ -389,8 +454,11 @@ function ProjectsTab({ data, onChange }) {
         },
       ],
     });
-  const removeProject = (i) =>
+  const removeProject = (i) => {
+    // 删除项目时同步释放浏览器暂存的大文件素材
+    releaseMedia(projects[i].media);
     onChange({ ...data, projects: projects.filter((_, idx) => idx !== i) });
+  };
 
   return (
     <div className="space-y-4">
@@ -419,7 +487,7 @@ function ProjectsTab({ data, onChange }) {
           {/* 媒体文件编辑 */}
           <div className="border-t border-gray-800 pt-3">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-xs text-gray-500">媒体文件(≤2MB 图片 / ≤3MB 视频可上传转内嵌;大文件放项目 assets/ 目录填相对路径,或粘贴图床 URL;点击卡片弹窗中展示)</p>
+              <p className="text-xs text-gray-500">媒体文件(直接「上传文件」:≤2MB 图片 / ≤3MB 视频自动内嵌;更大的自动暂存浏览器并填相对路径,导出 zip 打包、发布时随 assets/ 自动上线;也可粘贴图床 URL;点击卡片弹窗中展示)</p>
               <button
                 className="admin-btn-add !py-1 !px-2 text-xs"
                 onClick={() =>
@@ -441,7 +509,13 @@ function ProjectsTab({ data, onChange }) {
                         value={m.type}
                         onChange={(e) => {
                           const media = [...(p.media || [])];
-                          media[mi] = { ...media[mi], type: e.target.value };
+                          // 切换类型时,已暂存素材的路径目录与类型不匹配:释放并清空 src
+                          if (isAssetPath(media[mi].src)) {
+                            deleteMediaBlob(media[mi].src);
+                            media[mi] = { ...media[mi], type: e.target.value, src: '' };
+                          } else {
+                            media[mi] = { ...media[mi], type: e.target.value };
+                          }
                           updateProject(pi, { media });
                         }}
                       >
@@ -479,6 +553,9 @@ function ProjectsTab({ data, onChange }) {
                   <button
                     className="admin-btn-remove flex-shrink-0 !w-7 !h-7"
                     onClick={() => {
+                      // 删除媒体时释放浏览器暂存文件
+                      const cur = (p.media || [])[mi];
+                      if (cur && isAssetPath(cur.src)) deleteMediaBlob(cur.src);
                       const media = (p.media || []).filter((_, idx) => idx !== mi);
                       updateProject(pi, { media });
                     }}
@@ -647,7 +724,9 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
   const [draft, setDraft] = useState(() => JSON.parse(JSON.stringify(data)));
   const [savedAt, setSavedAt] = useState(null);
   const [doneFlash, setDoneFlash] = useState(false); // 「完成」按钮的短暂反馈提示
+  const [exportMsg, setExportMsg] = useState(''); // 导出结果的短暂提示
   const doneTimer = useRef(null);
+  const exportTimer = useRef(null);
 
   // ESC 关闭 + 锁定背景滚动
   useEffect(() => {
@@ -671,27 +750,60 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
   };
 
   const handleReset = () => {
-    if (window.confirm('确定恢复为 resume.js 中的默认数据吗?当前 localStorage 中的修改将被清除。')) {
+    if (window.confirm('确定恢复为 resume.js 中的默认数据吗?当前 localStorage 中的修改将被清除,浏览器暂存的大文件素材也会一并清理。')) {
+      // 清理浏览器暂存的大文件素材,避免残留占用空间
+      (draft.projects || []).forEach((p) => releaseMedia(p.media || []));
       onReset();
       setDraft(JSON.parse(JSON.stringify(defaultData)));
       setSavedAt(null);
     }
   };
 
-  // 「导出数据」:下载当前全部数据为 JSON 文件,用于同步到 Git 源码后重新部署
-  const handleExport = () => {
-    const json = JSON.stringify(draft, null, 2);
-    const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+  // 「导出数据」:下载当前全部数据。
+  // 存在浏览器暂存的大文件素材时打包为 zip(JSON + assets/ 文件),否则直接下载 JSON
+  const handleExport = async () => {
     const d = new Date();
     const pad = (n) => String(n).padStart(2, '0');
-    a.href = url;
-    a.download = `portfolio-data-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const dateStr = `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+    const json = JSON.stringify(draft, null, 2);
+
+    // 收集相对路径素材:优先取 IndexedDB 暂存文件;取不到说明素材已在项目 assets/,无需打包
+    const seen = new Set();
+    const assetSrcs = [];
+    (draft.projects || []).forEach((p) =>
+      (p.media || []).forEach((m) => {
+        if (isAssetPath(m.src) && !seen.has(m.src)) {
+          seen.add(m.src);
+          assetSrcs.push(m.src);
+        }
+      })
+    );
+    const files = [];
+    for (const src of assetSrcs) {
+      try {
+        const blob = await getMediaBlob(src);
+        if (blob) files.push({ name: src, blob });
+      } catch (e) {
+        // 单个素材读取失败不阻塞导出,该文件视为已在项目 assets/ 中
+      }
+    }
+
+    const jsonName = `portfolio-data-${dateStr}.json`;
+    if (files.length) {
+      try {
+        const zip = await makeZip([{ name: jsonName, blob: new Blob([json], { type: 'application/json' }) }, ...files]);
+        downloadBlob(zip, `portfolio-data-${dateStr}.zip`);
+        setExportMsg(`✓ 已导出 zip(内含 ${files.length} 个素材):同步脚本可直接处理 zip,素材自动落到项目 assets/`);
+      } catch (e) {
+        setExportMsg('✗ zip 打包失败,已改导纯 JSON,请检查浏览器存储');
+        downloadBlob(new Blob([json], { type: 'application/json' }), jsonName);
+      }
+    } else {
+      downloadBlob(new Blob([json], { type: 'application/json' }), jsonName);
+      setExportMsg('✓ 已导出 JSON(无浏览器暂存素材,直接同步即可)');
+    }
+    clearTimeout(exportTimer.current);
+    exportTimer.current = setTimeout(() => setExportMsg(''), 8000);
   };
 
   // 「完成」:数据为自动保存,此处仅提示保存结果,不关闭面板
@@ -702,7 +814,13 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
     doneTimer.current = setTimeout(() => setDoneFlash(false), 2000);
   };
 
-  useEffect(() => () => clearTimeout(doneTimer.current), []);
+  useEffect(
+    () => () => {
+      clearTimeout(doneTimer.current);
+      clearTimeout(exportTimer.current);
+    },
+    []
+  );
 
   return (
     <div
@@ -723,11 +841,12 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
               后台管理
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              {doneFlash
-                ? '✓ 已保存,可继续编辑 · 点右上角「退出」关闭后台'
-                : savedAt
-                  ? `已自动保存 · ${savedAt.toLocaleTimeString()} · 数据存于浏览器 localStorage`
-                  : '修改自动保存到浏览器 localStorage,前台页面实时更新'}
+              {exportMsg ||
+                (doneFlash
+                  ? '✓ 已保存,可继续编辑 · 点右上角「退出」关闭后台'
+                  : savedAt
+                    ? `已自动保存 · ${savedAt.toLocaleTimeString()} · 数据存于浏览器 localStorage`
+                    : '修改自动保存到浏览器 localStorage,前台页面实时更新')}
             </p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
