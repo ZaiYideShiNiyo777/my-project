@@ -39,8 +39,14 @@ export function getResumeData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // 与默认值合并,避免后续新增字段时页面缺数据
-      cache = { ...defaultData, ...parsed };
+      // 与默认值合并,避免后续新增字段时页面缺数据;
+      // 但 projects 不做默认回填:后台删光项目后前端应如实显示「暂无项目」,
+      // 而不是把默认示例项目顶替上来(实事求是,不补占位)
+      cache = {
+        ...defaultData,
+        ...parsed,
+        projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+      };
       return cache;
     }
   } catch (e) {

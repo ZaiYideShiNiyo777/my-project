@@ -23,8 +23,17 @@ function openDB() {
           }
         };
         req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
+        // 打开失败时重置 dbPromise,下次调用重试(隐私模式恢复后无需刷新页面)
+        req.onerror = () => {
+          dbPromise = null;
+          reject(req.error);
+        };
+        req.onblocked = () => {
+          dbPromise = null;
+          reject(new Error('IndexedDB 被其他页面占用,请关闭其他标签页后重试'));
+        };
       } catch (e) {
+        dbPromise = null;
         reject(e);
       }
     });

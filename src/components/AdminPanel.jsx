@@ -110,20 +110,23 @@ function MediaUploadField({ type, value, onChange }) {
 
   // 相对路径素材:优先取 IndexedDB 暂存文件预览(未部署时也能看到);取不到则按 src 直接加载
   useEffect(() => {
-    let url = '';
+    let objectUrl = '';
     let cancelled = false;
+    // src 每次变化先清空旧预览:否则上一个暂存文件的 blob 会残留并优先于新值渲染,
+    // 且该 blob 在清理时已被 revoke,导致新上传的图片(data URI)预览空白
+    setPreviewUrl('');
     if (isAssetPath(value)) {
       getMediaBlob(value)
         .then((blob) => {
           if (cancelled || !blob) return;
-          url = URL.createObjectURL(blob);
-          setPreviewUrl(url);
+          objectUrl = URL.createObjectURL(blob);
+          setPreviewUrl(objectUrl);
         })
         .catch(() => {});
     }
     return () => {
       cancelled = true;
-      if (url) URL.revokeObjectURL(url);
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [value]);
 
@@ -154,6 +157,8 @@ function MediaUploadField({ type, value, onChange }) {
       const src = (isImage ? ASSET_IMAGE_DIR : ASSET_VIDEO_DIR) + file.name;
       try {
         await saveMediaBlob(src, file);
+        // handleFile 直接写值(不走 handleSrcChange):替换旧 asset 路径时需释放其暂存文件
+        if (src !== value && isAssetPath(value)) deleteMediaBlob(value);
         setErr('');
         setInfo(`✓ 已暂存(${mb}MB),src 已自动填入相对路径;「导出数据」会自动打包该文件,同步后随站点上线`);
         onChange(src);
@@ -165,6 +170,8 @@ function MediaUploadField({ type, value, onChange }) {
 
     const reader = new FileReader();
     reader.onload = () => {
+      // 小文件内嵌替换旧 asset 路径时,同样释放旧暂存文件(不走 handleSrcChange)
+      if (isAssetPath(value)) deleteMediaBlob(value);
       setErr('');
       setInfo('');
       onChange(reader.result); // base64 data URI,直接写入 src
@@ -173,9 +180,13 @@ function MediaUploadField({ type, value, onChange }) {
     reader.readAsDataURL(file);
   };
 
-  // src 被改写时,同步释放旧路径的暂存文件
+  // src 被改写时,同步释放旧路径的暂存文件,并清空过期的提示文案
   const handleSrcChange = (v) => {
     if (v !== value && isAssetPath(value)) deleteMediaBlob(value);
+    if (v !== value) {
+      setErr('');
+      setInfo('');
+    }
     onChange(v);
   };
 
@@ -509,12 +520,19 @@ function ProjectsTab({ data, onChange }) {
                         value={m.type}
                         onChange={(e) => {
                           const media = [...(p.media || [])];
-                          // 切换类型时,已暂存素材的路径目录与类型不匹配:释放并清空 src
-                          if (isAssetPath(media[mi].src)) {
-                            deleteMediaBlob(media[mi].src);
-                            media[mi] = { ...media[mi], type: e.target.value, src: '' };
+                          const next = e.target.value;
+                          const curSrc = media[mi].src;
+                          // 切换类型时,旧素材与目标类型不匹配必须清空 src,否则预览黑屏:
+                          // - assets/ 路径:目录与类型绑定(图片/videos),释放暂存文件并清空
+                          // - data URI:MIME 与目标类型不一致时(如图片 data:image/* 挂在视频条目),
+                          //   <video>/<img> 无法解码 → 「无法播放媒体」/空白,同样清空
+                          const isDataUri = typeof curSrc === 'string' && curSrc.indexOf('data:') === 0;
+                          const mimeOk = isDataUri && curSrc.indexOf('data:' + next + '/') === 0;
+                          if (isAssetPath(curSrc) || (isDataUri && !mimeOk)) {
+                            if (isAssetPath(curSrc)) deleteMediaBlob(curSrc);
+                            media[mi] = { ...media[mi], type: next, src: '' };
                           } else {
-                            media[mi] = { ...media[mi], type: e.target.value };
+                            media[mi] = { ...media[mi], type: next };
                           }
                           updateProject(pi, { media });
                         }}
@@ -525,6 +543,7 @@ function ProjectsTab({ data, onChange }) {
                     </label>
                     <div className="sm:col-span-2">
                       <MediaUploadField
+                        key={`${mi}-${m.type}`}
                         type={m.type}
                         value={m.src}
                         onChange={(v) => {

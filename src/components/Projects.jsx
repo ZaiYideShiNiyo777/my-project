@@ -1,46 +1,125 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useScrollReveal from '../hooks/useScrollReveal';
 import ProjectModal from './ProjectModal';
+import MediaImage from './MediaImage';
+import { useMediaSource } from '../hooks/useMediaSource';
 import { uiTexts as defaultUiTexts } from '../data/resume';
 
 const CARD_WIDTH = 280;
 const CARD_GAP = 16;
 const STEP = CARD_WIDTH + CARD_GAP;
-// 无限循环方案:把项目列表克隆多份连成一条长轨,
-// 在克隆区完成"回卷"后再无动画跳回中间段(首尾内容一致,视觉无感知)
-const COPIES = 5;
+
+// 卡片视频封面:自动静音循环播放(首页即可预览视频),失败降级为图标占位
+function VideoCover({ src, poster, icon, color }) {
+  const url = useMediaSource(src);
+  const posterUrl = useMediaSource(poster);
+  const [failed, setFailed] = useState(false);
+
+  if (failed || !url) {
+    return (
+      <div
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ background: `linear-gradient(135deg, ${color}20, ${color}05)` }}
+      >
+        <span className="text-4xl" style={{ color }}>{icon}</span>
+      </div>
+    );
+  }
+
+  return (
+    <video
+      src={url}
+      poster={posterUrl || undefined}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="metadata"
+      className="absolute inset-0 w-full h-full object-cover"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
+// 卡片封面:优先展示第一个有内容的媒体(图片/视频),无媒体时显示图标占位
+function CardCover({ p }) {
+  const first = (p.media || []).find((m) => m.src);
+  if (!first) {
+    return (
+      <div
+        className="absolute inset-0 flex items-center justify-center bg-gray-800"
+        style={{ background: `linear-gradient(135deg, ${p.color}20, ${p.color}05)` }}
+      >
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl"
+          style={{ backgroundColor: `${p.color}30`, color: p.color }}
+        >
+          {p.icon}
+        </div>
+      </div>
+    );
+  }
+  if (first.type === 'video') {
+    return <VideoCover src={first.src} poster={first.poster} icon={p.icon} color={p.color} />;
+  }
+  return (
+    <MediaImage
+      src={first.src}
+      icon={p.icon}
+      color={p.color}
+      alt={`${p.title} 封面`}
+      className="absolute inset-0 w-full h-full object-cover"
+    />
+  );
+}
 
 export default function Projects({ projects, uiTexts = defaultUiTexts }) {
   const title = useScrollReveal();
   const TOTAL = projects.length;
-  // 项目数据变化(后台编辑)时重新生成长轨
-  const list = useMemo(() => Array.from({ length: COPIES }, () => projects).flat(), [projects]);
-  const [index, setIndex] = useState(TOTAL); // 初始指向第一份克隆 → 展示真实第一张
-  const [animating, setAnimating] = useState(true);
+  // 直接使用真实项目数组:后台有几个项目,前端就展示几个,不克隆、不重复、不补占位
+  const list = useMemo(() => projects, [projects]);
+  const [index, setIndex] = useState(0); // 当前滑动到的起始卡片下标
+  const [animating, setAnimating] = useState(false);
   const [active, setActive] = useState(null);
   const trackRef = useRef(null);
 
-  // 左右无限循环:直接向两侧滑动,不做边界截断
+  // 有边界滑动:滑到两端后对应箭头禁用(不做无限循环克隆)
+  const canPrev = index > 0;
+  const canNext = index < TOTAL - 1;
   const go = (dir) => {
     setAnimating(true);
-    setIndex((i) => i + dir);
+    setIndex((i) => Math.max(0, Math.min(TOTAL - 1, i + dir)));
   };
 
-  // 一次滑动过渡结束后,把下标回卷到中间克隆区(等价位置,无跳变)
+  // 一次滑动过渡结束,复位动画状态等待下一次滑动
   const onTransitionEnd = (e) => {
     if (e.target !== e.currentTarget) return; // 忽略子元素(hover 等)冒泡的过渡事件
-    setIndex((i) => {
-      if (i >= TOTAL && i <= 2 * TOTAL - 1) return i;
-      let n = i;
-      while (n > 2 * TOTAL - 1) n -= TOTAL;
-      while (n < TOTAL) n += TOTAL;
-      return n;
-    });
-    setAnimating(false); // 回卷瞬间禁用过渡,下一帧恢复
-    requestAnimationFrame(() => requestAnimationFrame(() => setAnimating(true)));
+    setAnimating(false);
   };
 
   const closeModal = useCallback(() => setActive(null), []);
+
+  // 空状态:后台没有任何项目时如实显示「暂无项目」,不渲染占位卡片
+  if (TOTAL === 0) {
+    return (
+      <section id="projects" className="relative">
+        <div className="section-container">
+          <div
+            ref={title.ref}
+            style={{
+              transition: '0.6s ease-out',
+              opacity: title.visible ? 1 : 0,
+              transform: title.visible ? 'translateY(0)' : 'translateY(30px)',
+            }}
+          >
+            <h2 className="section-title">{uiTexts.projectsTitle}</h2>
+            <p className="section-subtitle">{uiTexts.projectsSubtitle}</p>
+          </div>
+          <p className="text-center text-gray-500 py-16">暂无项目</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="projects" className="relative">
@@ -53,8 +132,9 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
         <div className="relative flex items-center justify-center">
           {/* 左箭头 */}
           <button
-            className="absolute left-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300"
+            className="absolute left-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800/80 disabled:hover:text-gray-400 disabled:hover:border-gray-700"
             style={{ transform: 'translateX(-50%)' }}
+            disabled={!canPrev}
             onClick={() => go(-1)}
             aria-label="上一个项目"
           >
@@ -76,8 +156,6 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
               }}
             >
               {list.map((p, i) => {
-                // 视频数量徽章:从媒体列表自动统计,后台增删媒体后自动同步
-                const videoCount = (p.media || []).filter((m) => m.type === 'video').length;
                 return (
                   <div
                     key={`${p.title}-${i}`}
@@ -85,29 +163,13 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
                     className="project-card-carousel group cursor-pointer rounded-2xl overflow-hidden bg-gray-900/30 flex-shrink-0"
                     style={{ width: CARD_WIDTH }}
                   >
-                    {/* 封面 */}
+                    {/* 封面:优先展示第一个媒体(图片/视频),无媒体时显示图标占位 */}
                     <div className="project-card-cover relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
-                      <div
-                        className="absolute inset-0 flex items-center justify-center bg-gray-800"
-                        style={{ background: `linear-gradient(135deg, ${p.color}20, ${p.color}05)` }}
-                      >
-                        <div
-                          className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl"
-                          style={{ backgroundColor: `${p.color}30`, color: p.color }}
-                        >
-                          {p.icon}
-                        </div>
-                      </div>
+                      <CardCover p={p} />
 
                       {/* hover 遮罩 */}
                       <div className="absolute inset-0 bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                         <span className="px-4 py-2 bg-primary-500/80 rounded-full text-sm text-white font-medium">查看详情</span>
-                      </div>
-
-                      {/* 媒体数量徽章 */}
-                      <div className="absolute top-3 right-3 px-2 py-1 bg-black/50 rounded-full text-xs text-white flex items-center gap-1 pointer-events-none">
-                        <span>🖼 {p.imageCount}</span>
-                        {videoCount ? <span>▶ {videoCount}</span> : null}
                       </div>
                     </div>
 
@@ -126,8 +188,9 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
 
           {/* 右箭头 */}
           <button
-            className="absolute right-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300"
+            className="absolute right-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800/80 disabled:hover:text-gray-400 disabled:hover:border-gray-700"
             style={{ transform: 'translateX(50%)' }}
+            disabled={!canNext}
             onClick={() => go(1)}
             aria-label="下一个项目"
           >

@@ -34,5 +34,9 @@ module.exports = {
     port: 3001,
     hot: true,
     historyApiFallback: true,
+    // 本地预览时静态托管 assets/(视频/图片相对路径素材),与部署后 dist/assets 行为一致
+    before(app) {
+      app.use('/assets', require('express').static(path.resolve(__dirname, 'assets')));
+    },
   },
 };

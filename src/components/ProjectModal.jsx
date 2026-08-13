@@ -1,13 +1,21 @@
 import React, { useEffect, useState } from 'react';
+import MediaImage from './MediaImage';
+import { useMediaSource } from '../hooks/useMediaSource';
 
-// 图片(加载失败时降级为渐变占位,保证离线也能看)
-function MediaImage({ src, icon, color, alt, className }) {
+// 视频 MIME:按扩展名判断(后台支持 mp4 / webm 两种格式)
+const videoMime = (src) =>
+  typeof src === 'string' && src.toLowerCase().indexOf('.webm') > -1 ? 'video/webm' : 'video/mp4';
+
+// 视频:assets/ 相对路径自动从 IndexedDB 取暂存文件(未部署也能播放);失败降级为渐变占位
+function VideoStage({ src, poster, icon, color }) {
+  const url = useMediaSource(src);
+  const posterUrl = useMediaSource(poster);
   const [failed, setFailed] = useState(false);
 
-  if (failed) {
+  if (failed || !url) {
     return (
       <div
-        className={`${className} flex items-center justify-center`}
+        className="w-full h-full flex items-center justify-center"
         style={{ background: `linear-gradient(135deg, ${color}25, #101014 70%)` }}
       >
         <span className="text-5xl" style={{ color }}>{icon}</span>
@@ -15,7 +23,39 @@ function MediaImage({ src, icon, color, alt, className }) {
     );
   }
 
-  return <img src={src} alt={alt} className={className} onError={() => setFailed(true)} />;
+  return (
+    <video
+      controls
+      preload="metadata"
+      poster={posterUrl || undefined}
+      className="w-full h-full object-cover media-switch"
+      onError={() => setFailed(true)}
+    >
+      <source src={url} type={videoMime(src)} />
+      您的浏览器不支持视频播放
+    </video>
+  );
+}
+
+// 视频缩略图:设置了封面图时显示封面,否则显示播放图标
+function VideoThumb({ poster, color }) {
+  const posterUrl = useMediaSource(poster);
+  const [failed, setFailed] = useState(false);
+
+  if (!poster || failed || !posterUrl) {
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center relative"
+        style={{ background: `linear-gradient(135deg, ${color}30, #101014)` }}
+      >
+        <span className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center text-xs text-white pl-0.5">▶</span>
+      </div>
+    );
+  }
+
+  return (
+    <img src={posterUrl} alt="" className="w-full h-full object-cover" onError={() => setFailed(true)} />
+  );
 }
 
 /**
@@ -25,9 +65,16 @@ function MediaImage({ src, icon, color, alt, className }) {
  */
 export default function ProjectModal({ project, onClose }) {
   const [current, setCurrent] = useState(0);
+  // 当前图片自然宽高比:长图按自身比例自适应容器,避免被 16:9 裁剪
+  const [imgRatio, setImgRatio] = useState(null);
   const media = project.media && project.media.length ? project.media : [];
   const item = media[Math.min(current, Math.max(media.length - 1, 0))] || {};
   const isVideo = item.type === 'video';
+
+  // 切换媒体时重置图片比例(等待新图加载后重新测量)
+  useEffect(() => {
+    setImgRatio(null);
+  }, [item.src]);
 
   // ESC 关闭 + 打开时锁定背景滚动
   useEffect(() => {
@@ -44,6 +91,14 @@ export default function ProjectModal({ project, onClose }) {
   }, [onClose]);
 
   const step = (dir) => setCurrent((c) => (c + dir + media.length) % media.length);
+
+  // 主媒体容器:视频固定 16:9;图片按自然比例自适应(宽图 16:9 无裁剪,
+  // 长图按图片比例完整显示并限制最大高度,居中不裁切)
+  const stageStyle = isVideo
+    ? { aspectRatio: '16 / 9' }
+    : imgRatio && imgRatio < 16 / 9
+      ? { aspectRatio: String(imgRatio), maxHeight: '70vh', marginLeft: 'auto', marginRight: 'auto' }
+      : { aspectRatio: '16 / 9' };
 
   return (
     <div
@@ -84,19 +139,16 @@ export default function ProjectModal({ project, onClose }) {
 
         {/* 媒体主区域 */}
         <div className="px-5 sm:px-6 pt-5">
-          <div className="relative rounded-xl overflow-hidden border border-gray-800 bg-black/40" style={{ aspectRatio: '16 / 9' }}>
+          <div className="relative w-full rounded-xl overflow-hidden border border-gray-800 bg-black/40" style={stageStyle}>
             {media.length > 0 ? (
               isVideo ? (
-                <video
+                <VideoStage
                   key={item.src}
-                  controls
-                  preload="metadata"
+                  src={item.src}
                   poster={item.poster}
-                  className="w-full h-full object-cover media-switch"
-                >
-                  <source src={item.src} type="video/mp4" />
-                  您的浏览器不支持视频播放
-                </video>
+                  icon={project.icon}
+                  color={project.color}
+                />
               ) : (
                 <MediaImage
                   key={item.src}
@@ -105,6 +157,7 @@ export default function ProjectModal({ project, onClose }) {
                   color={project.color}
                   alt={`${project.title} 图片 ${current + 1}`}
                   className="w-full h-full object-cover media-switch"
+                  onLoad={(w, h) => h > 0 && setImgRatio(w / h)}
                 />
               )
             ) : (
@@ -122,7 +175,8 @@ export default function ProjectModal({ project, onClose }) {
                 <button
                   onClick={() => step(-1)}
                   aria-label="上一个媒体"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
+                  className="absolute w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
+                  style={{ left: 12, top: '50%', transform: 'translateY(-50%)' }}
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -131,7 +185,8 @@ export default function ProjectModal({ project, onClose }) {
                 <button
                   onClick={() => step(1)}
                   aria-label="下一个媒体"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
+                  className="absolute w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
+                  style={{ right: 12, top: '50%', transform: 'translateY(-50%)' }}
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -141,7 +196,10 @@ export default function ProjectModal({ project, onClose }) {
             )}
 
             {/* 序号徽章 */}
-            <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded-md bg-black/60 text-xs text-gray-300 pointer-events-none">
+            <span
+              className="absolute px-2.5 py-1 rounded-md bg-black/60 text-xs text-gray-300 pointer-events-none"
+              style={{ bottom: 12, right: 12 }}
+            >
               {current + 1} / {media.length}
             </span>
           </div>
@@ -159,12 +217,7 @@ export default function ProjectModal({ project, onClose }) {
                   }`}
                 >
                   {m.type === 'video' ? (
-                    <div
-                      className="w-full h-full flex items-center justify-center relative"
-                      style={{ background: `linear-gradient(135deg, ${project.color}30, #101014)` }}
-                    >
-                      <span className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center text-[10px] text-white pl-0.5">▶</span>
-                    </div>
+                    <VideoThumb poster={m.poster} color={project.color} />
                   ) : (
                     <MediaImage
                       src={m.src}
