@@ -29,7 +29,7 @@ export default function About({
     <section id="about" className="relative">
       <div className="section-container">
         <div ref={title.ref} style={revealStyle(title.visible)}>
-          <h2 className="section-title">
+          <h2 className="section-title" data-index="01" data-kicker="SYSTEM PROFILE">
             {uiTexts.aboutTitle} <span className="gradient-text">{uiTexts.aboutTitleAccent}</span>
           </h2>
           <p className="section-subtitle">{uiTexts.aboutSubtitle}</p>
@@ -38,9 +38,12 @@ export default function About({
         <div className="grid md:grid-cols-2 gap-8 items-center">
           {/* 左侧：头像 + 基本信息 */}
           <div className="flex flex-col items-center md:items-start" ref={left.ref} style={revealStyle(left.visible)}>
-            <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary-500 to-accent-400 p-1 mb-6">
-              <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-                <span className="text-5xl font-bold gradient-text">{profile.avatarChar}</span>
+            {/* 头像:全息扫描框(渐变描边 + 网格底纹 + 扫描线) */}
+            <div className="w-52 h-52 mb-6">
+              <div className="scan-frame w-full h-full">
+                <div className="scan-frame-inner flex items-center justify-center">
+                  <span className="text-5xl font-bold gradient-text">{profile.avatarChar}</span>
+                </div>
               </div>
             </div>
             <div className="space-y-3 text-center md:text-left">
@@ -68,12 +71,12 @@ export default function About({
           <div className="space-y-6" ref={right.ref} style={revealStyle(right.visible)}>
             <p className="text-gray-300 leading-relaxed text-lg">{profile.bio}</p>
 
-            {/* 数据指标 */}
+            {/* 数据仪表指标 */}
             <div className="grid grid-cols-3 gap-4">
               {stats.map((s) => (
-                <div key={s.label} className="glow-card p-4 text-center">
-                  <div className="text-3xl font-bold gradient-text mb-1">{s.value}</div>
-                  <div className="text-xs text-gray-400">{s.label}</div>
+                <div key={s.label} className="glow-card stat-card p-4 text-center">
+                  <div className="stat-value mb-1">{s.value}</div>
+                  <div className="stat-label">{s.label}</div>
                 </div>
               ))}
             </div>
@@ -97,9 +100,8 @@ export default function About({
                 {projectAreas.map((t) => (
                   <span
                     key={t.label}
-                    className="px-3 py-2 rounded-lg text-xs font-medium border"
+                    className="frost-pill px-3 py-2 rounded-lg text-xs font-medium"
                     style={{
-                      backgroundColor: `${t.color}15`,
                       borderColor: `${t.color}40`,
                       color: t.color,
                     }}

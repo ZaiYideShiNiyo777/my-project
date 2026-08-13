@@ -3,7 +3,7 @@ import useScrollReveal from '../hooks/useScrollReveal';
 import { skillGroups as defaultSkillGroups, uiTexts as defaultUiTexts } from '../data/resume';
 
 // 单项技能:进入视口时进度条从 0 增长到目标值
-function SkillItem({ skill, color, delay }) {
+function SkillItem({ skill, color, delay, index }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
@@ -35,14 +35,18 @@ function SkillItem({ skill, color, delay }) {
       }}
     >
       <div className="glow-card p-4 skill-hover-card h-full" style={{ '--glow-color': color }}>
-        <div className="flex justify-between items-center mb-2">
+        <div className="flex items-center justify-between mb-2.5">
+          <span className="skill-num">{String(index + 1).padStart(2, '0')}</span>
           <span className="text-sm font-medium text-white">{skill.name}</span>
-          <span className="text-xs text-gray-500">{skill.pct}%</span>
+          <span className="skill-pct">{skill.pct}%</span>
         </div>
-        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+        <div className="skill-track">
           <div
-            className="h-full rounded-full transition-all duration-1000 ease-out"
-            style={{ width: visible ? `${skill.pct}%` : '0%', backgroundColor: color }}
+            className="skill-fill"
+            style={{
+              width: visible ? `${skill.pct}%` : '0%',
+              background: `linear-gradient(90deg, ${color}, #22d3ee)`,
+            }}
           />
         </div>
       </div>
@@ -57,7 +61,7 @@ export default function Skills({ skillGroups = defaultSkillGroups, uiTexts = def
     <section id="skills" className="relative">
       <div className="section-container">
         <div ref={title.ref} style={{ transition: '0.6s ease-out', opacity: title.visible ? 1 : 0, transform: title.visible ? 'translateY(0)' : 'translateY(30px)' }}>
-          <h2 className="section-title">{uiTexts.skillsTitle}</h2>
+          <h2 className="section-title" data-index="03" data-kicker="CAPABILITY MATRIX">{uiTexts.skillsTitle}</h2>
           <p className="section-subtitle">{uiTexts.skillsSubtitle}</p>
         </div>
 
@@ -67,12 +71,15 @@ export default function Skills({ skillGroups = defaultSkillGroups, uiTexts = def
               className="text-lg font-semibold text-white mb-4 flex items-center gap-2"
               style={{ transition: '0.6s ease-out', opacity: title.visible ? 1 : 0, transform: title.visible ? 'translateY(0)' : 'translateY(30px)' }}
             >
-              <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: group.color }} />
+              <span
+                className="w-2 h-2 inline-block"
+                style={{ backgroundColor: group.color, color: group.color, transform: 'rotate(45deg)', borderRadius: 2, boxShadow: `0 0 8px ${group.color}` }}
+              />
               {group.title}
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {group.skills.map((skill, i) => (
-                <SkillItem key={skill.name} skill={skill} color={group.color} delay={i * 0.08} />
+                <SkillItem key={skill.name} skill={skill} color={group.color} delay={i * 0.08} index={i} />
               ))}
             </div>
           </div>

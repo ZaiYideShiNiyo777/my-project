@@ -3,7 +3,7 @@ import { profile as defaultProfile, uiTexts as defaultUiTexts } from '../data/re
 
 export default function Footer({ profile = defaultProfile, uiTexts = defaultUiTexts }) {
   return (
-    <footer className="border-t border-gray-800">
+    <footer className="border-t" style={{ borderColor: 'rgba(96, 165, 250, 0.14)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm select-none">

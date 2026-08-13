@@ -64,9 +64,9 @@ function App() {
       <GlobalBackground paused={authOpen || adminOpen} />
       {/* 全局可读性遮罩:让文字/卡片始终清晰,同时保持背景可见 */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[#101010]/35" />
-        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-[#101010]/75 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-[#101010]/75 to-transparent" />
+        <div className="absolute inset-0" style={{ background: 'rgba(16, 16, 16, 0.35)' }} />
+        <div className="absolute inset-x-0 top-0 h-36" style={{ background: 'linear-gradient(to bottom, rgba(16, 16, 16, 0.75), transparent)' }} />
+        <div className="absolute inset-x-0 bottom-0 h-36" style={{ background: 'linear-gradient(to top, rgba(16, 16, 16, 0.75), transparent)' }} />
       </div>
 
       {/* 内容层 */}

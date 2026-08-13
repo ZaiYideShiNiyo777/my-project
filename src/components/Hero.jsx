@@ -5,25 +5,29 @@ export default function Hero({ profile = defaultProfile, heroTags = defaultHeroT
   return (
     <section id="home" className="relative min-h-screen w-full overflow-hidden">
       {/* 首屏可读性渐变遮罩(全局动态背景由 App 提供,这里只负责文字清晰度) */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-r from-[#101010]/65 via-[#101010]/30 to-transparent pointer-events-none" />
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-[#101010]/80 via-[#101010]/10 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: 'linear-gradient(to right, rgba(9, 12, 18, 0.68), rgba(9, 12, 18, 0.32), transparent)' }} />
+      <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(9, 12, 18, 0.82), rgba(9, 12, 18, 0.1), transparent)' }} />
 
-      {/* 氛围光球 */}
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      {/* 氛围光球(蓝 / 青) */}
+      <div className="absolute top-1/4 -left-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'rgba(59, 130, 246, 0.12)', filter: 'blur(64px)' }} />
+      <div className="absolute bottom-1/4 -right-32 w-96 h-96 rounded-full pointer-events-none" style={{ background: 'rgba(34, 211, 238, 0.1)', filter: 'blur(64px)' }} />
 
       <div className="relative z-10 min-h-screen flex flex-col justify-end pb-24 px-6 sm:px-12 lg:px-20">
         <div className="max-w-2xl">
-          {/* 技术标签（品牌色） */}
+          {/* 终端 kicker(等宽青色标签) */}
+          <p className="hero-kicker animate-fade-in" style={{ animationDelay: '0.05s' }}>
+            DIGITAL TWIN SYSTEM // ONLINE
+          </p>
+        
+          {/* 技术标签(品牌色) */}
           <div className="flex flex-wrap gap-2 mb-8 animate-fade-in" style={{ animationDelay: '0.4s' }}>
             {heroTags.map((tag) => (
               <span
                 key={tag.label}
-                className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium border backdrop-blur-sm"
+                className="frost-pill inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-medium"
                 style={{
                   color: tag.color,
                   borderColor: `${tag.color}50`,
-                  backgroundColor: `${tag.color}10`,
                 }}
               >
                 {tag.label}
@@ -50,7 +54,7 @@ export default function Hero({ profile = defaultProfile, heroTags = defaultHeroT
               <div
                 key={s.title}
                 title={s.title}
-                className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white hover:border-primary-400/50 hover:bg-primary-500/15 hover:scale-125 hover:shadow-lg hover:shadow-primary-500/20 transition-all duration-300 cursor-default"
+                className="frost-icon-btn w-10 h-10 rounded-full flex items-center justify-center text-gray-400 cursor-default"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d={s.path} />
@@ -72,6 +76,14 @@ export default function Hero({ profile = defaultProfile, heroTags = defaultHeroT
             </a>
           </div>
         </div>
+      </div>
+
+      {/* 终端数据读数(纯 CSS 静态装饰,移动端隐藏) */}
+      <div className="hero-terminal hidden sm:block">
+        <div className="hero-terminal-line"><span>LAT</span><b>31.2304°N</b></div>
+        <div className="hero-terminal-line"><span>LON</span><b>121.4737°E</b></div>
+        <div className="hero-terminal-line"><span>ALT</span><b>042.8M</b></div>
+        <div className="hero-terminal-line"><span>SYS</span><b className="ok">ONLINE</b></div>
       </div>
     </section>
   );

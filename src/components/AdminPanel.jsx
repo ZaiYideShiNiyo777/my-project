@@ -856,7 +856,7 @@ export default function AdminPanel({ data, onDataChange, onReset, onClose }) {
         <div className="admin-header">
           <div className="min-w-0">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-gradient-to-r from-primary-500 to-accent-400 inline-block" />
+              <span className="w-2 h-2 inline-block" style={{ background: 'linear-gradient(90deg, #3b82f6, #22d3ee)', transform: 'rotate(45deg)', borderRadius: 2 }} />
               后台管理
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">

@@ -112,7 +112,7 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
               transform: title.visible ? 'translateY(0)' : 'translateY(30px)',
             }}
           >
-            <h2 className="section-title">{uiTexts.projectsTitle}</h2>
+            <h2 className="section-title" data-index="02" data-kicker="PROJECT ARCHIVE">{uiTexts.projectsTitle}</h2>
             <p className="section-subtitle">{uiTexts.projectsSubtitle}</p>
           </div>
           <p className="text-center text-gray-500 py-16">暂无项目</p>
@@ -125,14 +125,14 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
     <section id="projects" className="relative">
       <div className="section-container">
         <div ref={title.ref} style={{ transition: '0.6s ease-out', opacity: title.visible ? 1 : 0, transform: title.visible ? 'translateY(0)' : 'translateY(30px)' }}>
-          <h2 className="section-title">{uiTexts.projectsTitle}</h2>
+          <h2 className="section-title" data-index="02" data-kicker="PROJECT ARCHIVE">{uiTexts.projectsTitle}</h2>
           <p className="section-subtitle">{uiTexts.projectsSubtitle}</p>
         </div>
 
         <div className="relative flex items-center justify-center">
           {/* 左箭头 */}
           <button
-            className="absolute left-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800/80 disabled:hover:text-gray-400 disabled:hover:border-gray-700"
+            className="absolute left-0 z-10 carousel-arrow"
             style={{ transform: 'translateX(-50%)' }}
             disabled={!canPrev}
             onClick={() => go(-1)}
@@ -156,26 +156,37 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
               }}
             >
               {list.map((p, i) => {
+                const first = (p.media || []).find((m) => m.src);
+                const typeLabel = first ? (first.type === 'video' ? 'VIDEO' : 'IMAGE') : 'ICON';
                 return (
                   <div
                     key={`${p.title}-${i}`}
                     onClick={() => setActive(p)}
-                    className="project-card-carousel group cursor-pointer rounded-2xl overflow-hidden bg-gray-900/30 flex-shrink-0"
+                    className="project-card-carousel group cursor-pointer rounded-2xl overflow-hidden flex-shrink-0"
                     style={{ width: CARD_WIDTH }}
                   >
                     {/* 封面:优先展示第一个媒体(图片/视频),无媒体时显示图标占位 */}
                     <div className="project-card-cover relative overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+                      {/* HUD 序号角标 */}
+                      <span className="project-badge">{String(i + 1).padStart(2, '0')} / {String(TOTAL).padStart(2, '0')}</span>
                       <CardCover p={p} />
+                      {/* 媒体类型角标 */}
+                      <span className="project-type-badge">{typeLabel}</span>
 
                       {/* hover 遮罩 */}
-                      <div className="absolute inset-0 bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <span className="px-4 py-2 bg-primary-500/80 rounded-full text-sm text-white font-medium">查看详情</span>
+                      <div className="project-hover-mask absolute inset-0 opacity-0 transition-opacity duration-300 flex items-center justify-center">
+                        <span
+                          className="px-4 py-1.5 rounded-md text-sm font-medium"
+                          style={{ backgroundColor: 'rgba(9, 13, 20, 0.85)', border: '1px solid rgba(34, 211, 238, 0.6)', color: '#a5f3fc' }}
+                        >
+                          查看详情
+                        </span>
                       </div>
                     </div>
 
                     {/* 信息 */}
                     <div className="mt-3 px-3 pb-3">
-                      <h3 className="text-base font-semibold transition-colors truncate text-white group-hover:text-primary-400">
+                      <h3 className="text-base font-semibold transition-colors truncate text-white">
                         {p.title}
                       </h3>
                       <p className="text-sm mt-1 line-clamp-2 leading-relaxed text-gray-400">{p.desc}</p>
@@ -188,7 +199,7 @@ export default function Projects({ projects, uiTexts = defaultUiTexts }) {
 
           {/* 右箭头 */}
           <button
-            className="absolute right-0 z-10 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gray-800/80 border border-gray-700 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-700 hover:border-primary-400/50 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-gray-800/80 disabled:hover:text-gray-400 disabled:hover:border-gray-700"
+            className="absolute right-0 z-10 carousel-arrow"
             style={{ transform: 'translateX(50%)' }}
             disabled={!canNext}
             onClick={() => go(1)}

@@ -47,17 +47,19 @@ export default function Navbar({ navLinks = defaultNavLinks, uiTexts = defaultUi
             className="nav-logo text-xl font-bold pointer-events-none select-none cursor-pointer"
             onClick={() => jumpTo('home')}
           >
+            <span className="nav-logo-mark" />
             <span className="gradient-text">{uiTexts.navLogo}</span>
           </span>
 
           {/* 桌面端导航 */}
           <div className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
+            {navLinks.map((link, i) => (
               <button
                 key={link.id}
                 className={`nav-link ${active === link.id ? 'nav-link-active' : ''}`}
                 onClick={() => jumpTo(link.id)}
               >
+                <span className="nav-num">{String(i + 1).padStart(2, '0')}</span>
                 {link.label}
               </button>
             ))}
@@ -84,13 +86,17 @@ export default function Navbar({ navLinks = defaultNavLinks, uiTexts = defaultUi
 
         {/* 移动端下拉菜单 */}
         {menuOpen && (
-          <div className="md:hidden pb-4 flex flex-col items-center gap-4 bg-[#0a0a0f]/95 backdrop-blur-lg rounded-b-2xl py-4">
-            {navLinks.map((link) => (
+          <div
+            className="md:hidden pb-4 flex flex-col items-center gap-4 rounded-b-2xl py-4"
+            style={{ backgroundColor: 'rgba(10, 10, 15, 0.96)' }}
+          >
+            {navLinks.map((link, i) => (
               <button
                 key={link.id}
                 className={`nav-link ${active === link.id ? 'nav-link-active' : ''}`}
                 onClick={() => jumpTo(link.id)}
               >
+                <span className="nav-num">{String(i + 1).padStart(2, '0')}</span>
                 {link.label}
               </button>
             ))}
@@ -115,7 +121,7 @@ export default function Navbar({ navLinks = defaultNavLinks, uiTexts = defaultUi
       {/* 滚动阅读进度条 */}
       <div className="scroll-progress-track">
         <div
-          className="scroll-progress-bar bg-gradient-to-r from-primary-500 via-accent-400 to-primary-500"
+          className="scroll-progress-bar"
           style={{ width: `${progress}%` }}
         />
       </div>

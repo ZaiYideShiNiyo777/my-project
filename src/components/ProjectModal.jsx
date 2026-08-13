@@ -48,7 +48,7 @@ function VideoThumb({ poster, color }) {
         className="w-full h-full flex items-center justify-center relative"
         style={{ background: `linear-gradient(135deg, ${color}30, #101014)` }}
       >
-        <span className="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center text-xs text-white pl-0.5">▶</span>
+        <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs text-white pl-0.5" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>▶</span>
       </div>
     );
   }
@@ -116,21 +116,21 @@ export default function ProjectModal({ project, onClose }) {
       aria-modal="true"
       aria-label={project.title}
     >
-      <div className="modal-panel relative w-full max-w-3xl max-h-[88vh] overflow-y-auto overflow-x-hidden rounded-2xl border border-gray-700/60 bg-[#14141b] shadow-2xl shadow-black/60">
-        {/* 头部 */}
-        <div className="sticky top-0 z-10 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b border-gray-800/80 bg-[#14141b]/95 backdrop-blur-sm">
+      <div className="modal-panel relative w-full max-w-3xl max-h-[88vh] overflow-y-auto overflow-x-hidden">
+        {/* 头部:HUD 标题栏 */}
+        <div
+          className="sticky top-0 z-10 flex items-center justify-between gap-4 px-5 sm:px-6 py-4 border-b"
+          style={{ background: 'rgba(16, 21, 29, 0.96)', borderColor: 'rgba(96, 165, 250, 0.14)' }}
+        >
           <div className="min-w-0">
+            <span className="modal-head-label">PROJECT DETAIL // {String(current + 1).padStart(2, '0')}</span>
             <h3 className="text-lg sm:text-xl font-semibold text-white truncate">{project.title}</h3>
             <p className="text-xs text-gray-500 mt-0.5">
               {media.length} 个媒体文件
               {isVideo ? ' · 视频预览' : ''}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="关闭弹窗"
-            className="flex-shrink-0 w-9 h-9 rounded-full border border-gray-700 bg-gray-800/60 flex items-center justify-center text-gray-400 hover:text-white hover:border-primary-400/60 hover:bg-gray-700 transition-all duration-300"
-          >
+          <button onClick={onClose} aria-label="关闭弹窗" className="modal-close flex-shrink-0">
             <svg className="w-4.5 h-4.5" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -139,7 +139,7 @@ export default function ProjectModal({ project, onClose }) {
 
         {/* 媒体主区域 */}
         <div className="px-5 sm:px-6 pt-5">
-          <div className="relative w-full rounded-xl overflow-hidden border border-gray-800 bg-black/40" style={stageStyle}>
+          <div className="relative w-full rounded-xl overflow-hidden media-frame" style={{ ...stageStyle, backgroundColor: '#0b0b11' }}>
             {media.length > 0 ? (
               isVideo ? (
                 <VideoStage
@@ -175,8 +175,8 @@ export default function ProjectModal({ project, onClose }) {
                 <button
                   onClick={() => step(-1)}
                   aria-label="上一个媒体"
-                  className="absolute w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
-                  style={{ left: 12, top: '50%', transform: 'translateY(-50%)' }}
+                  className="absolute w-10 h-10 rounded-full border flex items-center justify-center text-white hover:border-primary-400 transition-all duration-300"
+                  style={{ left: 12, top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(0, 0, 0, 0.5)', borderColor: 'rgba(255, 255, 255, 0.12)' }}
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
@@ -185,8 +185,8 @@ export default function ProjectModal({ project, onClose }) {
                 <button
                   onClick={() => step(1)}
                   aria-label="下一个媒体"
-                  className="absolute w-10 h-10 rounded-full bg-black/50 border border-white/10 flex items-center justify-center text-white hover:bg-black/75 hover:border-primary-400/60 transition-all duration-300"
-                  style={{ right: 12, top: '50%', transform: 'translateY(-50%)' }}
+                  className="absolute w-10 h-10 rounded-full border flex items-center justify-center text-white hover:border-primary-400 transition-all duration-300"
+                  style={{ right: 12, top: '50%', transform: 'translateY(-50%)', backgroundColor: 'rgba(0, 0, 0, 0.5)', borderColor: 'rgba(255, 255, 255, 0.12)' }}
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -195,10 +195,10 @@ export default function ProjectModal({ project, onClose }) {
               </>
             )}
 
-            {/* 序号徽章 */}
+            {/* 序号徽章(等宽读数) */}
             <span
-              className="absolute px-2.5 py-1 rounded-md bg-black/60 text-xs text-gray-300 pointer-events-none"
-              style={{ bottom: 12, right: 12 }}
+              className="absolute px-2.5 py-1 rounded-md text-xs text-gray-300 pointer-events-none"
+              style={{ bottom: 12, right: 12, backgroundColor: 'rgba(7, 9, 13, 0.78)', border: '1px solid rgba(96, 165, 250, 0.3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}
             >
               {current + 1} / {media.length}
             </span>
@@ -213,7 +213,7 @@ export default function ProjectModal({ project, onClose }) {
                   onClick={() => setCurrent(i)}
                   aria-label={`查看第 ${i + 1} 个媒体`}
                   className={`flex-shrink-0 w-24 h-14 rounded-lg overflow-hidden border-2 transition-all duration-300 ${
-                    i === current ? 'border-primary-400 shadow-lg shadow-primary-500/20' : 'border-gray-700/70 opacity-60 hover:opacity-100'
+                    i === current ? 'thumb-active' : 'border-gray-700 opacity-60 hover:opacity-100'
                   }`}
                 >
                   {m.type === 'video' ? (
