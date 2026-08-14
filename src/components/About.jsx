@@ -1,5 +1,6 @@
 import React from 'react';
 import useScrollReveal from '../hooks/useScrollReveal';
+import RichText from './RichText';
 import {
   profile as defaultProfile,
   stats as defaultStats,
@@ -69,7 +70,8 @@ export default function About({
 
           {/* 右侧：简介 + 指标 + 标签 */}
           <div className="space-y-6" ref={right.ref} style={revealStyle(right.visible)}>
-            <p className="text-gray-300 leading-relaxed text-lg">{profile.bio}</p>
+            {/* 简介:按行拆分为独立段落(数据源 \n 换行),段落界限清晰 */}
+            <RichText text={profile.bio} delimiter="\n" className="text-gray-300 text-lg" />
 
             {/* 数据仪表指标 */}
             <div className="grid grid-cols-3 gap-4">

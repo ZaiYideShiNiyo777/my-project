@@ -1,5 +1,6 @@
 import React from 'react';
 import { profile as defaultProfile, heroTags as defaultHeroTags, socials as defaultSocials, uiTexts as defaultUiTexts } from '../data/resume';
+import RichText from './RichText';
 
 export default function Hero({ profile = defaultProfile, heroTags = defaultHeroTags, socials = defaultSocials, uiTexts = defaultUiTexts }) {
   return (
@@ -43,10 +44,8 @@ export default function Hero({ profile = defaultProfile, heroTags = defaultHeroT
             {profile.nameEn}
           </p>
 
-          {/* 简介 */}
-          <p className="text-gray-400 max-w-xl leading-relaxed mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            {profile.bio}
-          </p>
+          {/* 简介:按行拆分为独立段落,保持数据源换行结构 */}
+          <RichText text={profile.bio} delimiter="\n" className="text-gray-400 max-w-xl mb-6 animate-fade-in" />
 
           {/* 社交图标 */}
           <div className="flex items-center gap-4 mb-8 animate-fade-in" style={{ animationDelay: '0.3s' }}>

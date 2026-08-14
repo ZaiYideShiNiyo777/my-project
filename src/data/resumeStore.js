@@ -5,6 +5,7 @@
 // - 未保存过任何修改时,自动使用 resume.js 中的默认数据
 // ============================================================
 import * as resumeData from './resume';
+import { dataVersion } from './resume';
 
 const STORAGE_KEY = 'portfolio_resume_data_v1';
 
@@ -39,15 +40,27 @@ export function getResumeData() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      // 与默认值合并,避免后续新增字段时页面缺数据;
-      // 但 projects 不做默认回填:后台删光项目后前端应如实显示「暂无项目」,
-      // 而不是把默认示例项目顶替上来(实事求是,不补占位)
-      cache = {
-        ...defaultData,
-        ...parsed,
-        projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-      };
-      return cache;
+      // 版本指纹校验:localStorage 数据必须与源码数据版本一致才生效;
+      // 旧版本残留(如部署新数据前保存过的后台数据)自动丢弃并清理,
+      // 保证不同浏览器、不同时间打开的页面都显示最新数据
+      if (parsed && parsed.__version === dataVersion) {
+        const { __version, ...rest } = parsed;
+        // 与默认值合并,避免后续新增字段时页面缺数据;
+        // 但 projects 不做默认回填:后台删光项目后前端应如实显示「暂无项目」,
+        // 而不是把默认示例项目顶替上来(实事求是,不补占位)
+        cache = {
+          ...defaultData,
+          ...rest,
+          projects: Array.isArray(rest.projects) ? rest.projects : [],
+        };
+        return cache;
+      }
+      // 旧版本缓存:清理掉,下次直接走默认数据
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        // 忽略清理失败
+      }
     }
   } catch (e) {
     // localStorage 不可用或数据损坏,回退默认值
@@ -58,9 +71,12 @@ export function getResumeData() {
 
 // 保存简历数据(localStorage 持久化)
 export function saveResumeData(data) {
-  cache = data;
+  // 保存时携带当前数据版本,确保与源码数据版本绑定,
+  // 版本升级后旧缓存自动失效,不会混淆新旧数据
+  const payload = { ...data, __version: dataVersion };
+  cache = payload;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch (e) {
     // 隐私模式等场景下写入失败,仅内存生效
   }

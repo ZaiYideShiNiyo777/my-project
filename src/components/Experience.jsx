@@ -1,6 +1,7 @@
 import React from 'react';
 import useScrollReveal from '../hooks/useScrollReveal';
 import { experiences as defaultExperiences, uiTexts as defaultUiTexts } from '../data/resume';
+import RichText from './RichText';
 
 const revealStyle = (visible) => ({
   transition: '0.6s ease-out',
@@ -20,7 +21,8 @@ function ExperienceItem({ exp }) {
         </div>
         <h3 className="text-lg font-semibold text-white mb-1">{exp.title}</h3>
         <p className="text-sm text-gray-400 mb-3">{exp.company}</p>
-        <p className="text-sm text-gray-500 leading-relaxed">{exp.desc}</p>
+        {/* 职责描述:按空行拆分为段落,段内列表行逐行独立,层级分明 */}
+        <RichText text={exp.desc} className="text-sm text-gray-500" />
       </div>
     </div>
   );

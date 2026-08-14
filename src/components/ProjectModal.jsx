@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import MediaImage from './MediaImage';
 import { useMediaSource } from '../hooks/useMediaSource';
+import RichText from './RichText';
 
 // 视频 MIME:按扩展名判断(后台支持 mp4 / webm 两种格式)
 const videoMime = (src) =>
@@ -233,9 +234,9 @@ export default function ProjectModal({ project, onClose }) {
           )}
         </div>
 
-        {/* 描述 */}
+        {/* 描述:多行文本按段落渲染 */}
         <div className="px-5 sm:px-6 py-5">
-          <p className="text-sm leading-relaxed text-gray-400">{project.desc}</p>
+          <RichText text={project.desc} className="text-sm text-gray-400" />
         </div>
       </div>
     </div>
