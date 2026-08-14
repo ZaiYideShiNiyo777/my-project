@@ -8,32 +8,28 @@ export const profile = {
   "name": "任丁义",
   "nameEn": "Seti",
   "title": "三维模型师",
-  "location": "ZhengZhou",
+  "location": "郑州",
   "email": "1634012102@163.com",
-  "avatarChar": "Ding",
-  "bio": "热爱技术和创造，拥有 5 年全栈开发经验。擅长 React、Node.js 等技术栈，对 3D 可视化、性能优化有深入研究。致力于用技术解决实际问题，创造有价值的产品。"
+  "avatarChar": "Seti",
+  "bio": "1. 喜欢学习，有钻研精神。\n2. 计划性强，有较好的时间管理计划。\n3. 善于沟通，有较强的团队合作精神，合理利用团队资源。\n4. 使用 Ps  进行无缝贴图绘制\n5. 以 Blender  作为硬表面建模。熟悉高低模型制作流程，并在软件内通过 SimpleBake  进行贴图烘培。\n6. 熟练使用 Substance Painter  进行贴图绘制\n7. 通过Unity引擎同前后端紧密配合，完成工作流程，并合理运用到项目中"
 };
 
 export const heroTags = [
   {
-    "label": "React",
-    "color": "#61dafb"
+    "label": "Blender",
+    "color": "#e02606"
   },
   {
-    "label": "TypeScript",
+    "label": "Substance Painter",
     "color": "#3178c6"
   },
   {
-    "label": "Three.js",
+    "label": "Adobe Photoshop",
     "color": "#049ef4"
   },
   {
-    "label": "Node.js",
+    "label": "HDRP",
     "color": "#339933"
-  },
-  {
-    "label": "UI/UX",
-    "color": "#f472b6"
   },
   {
     "label": "WebGL",
@@ -49,25 +45,17 @@ export const stats = [
   {
     "value": "30+",
     "label": "完成项目"
-  },
-  {
-    "value": "99%",
-    "label": "客户好评"
   }
 ];
 
 export const coreTechs = [
   {
     "label": "Blender",
-    "color": "rgba(245, 121, 59, 0.314)"
-  },
-  {
-    "label": "Maya",
-    "color": "rgba(6, 150, 187, 0.314)"
+    "color": "#eb0505"
   },
   {
     "label": "Unity",
-    "color": "rgba(34, 44, 55, 0.314)"
+    "color": "#1f73f9"
   },
   {
     "label": "ZBrush",
@@ -80,6 +68,10 @@ export const coreTechs = [
   {
     "label": "WebGL",
     "color": "rgba(227, 79, 38, 0.314)"
+  },
+  {
+    "label": "TimeLine",
+    "color": "rgba(59, 130, 246, 0.3)"
   }
 ];
 
@@ -89,77 +81,77 @@ export const projectAreas = [
     "color": "#3b82f6"
   },
   {
-    "label": "角色建模",
-    "color": "#8b5cf6"
+    "label": "硬表面建模",
+    "color": "#6a37e1"
   },
   {
-    "label": "场景设计",
-    "color": "#ec4899"
+    "label": "场景建模",
+    "color": "#e71dbb"
   },
   {
-    "label": "协作白板",
-    "color": "#14b8a6"
+    "label": "倾斜摄影",
+    "color": "#53938b"
   }
 ];
 
 export const skillGroups = [
   {
-    "title": "建模与渲染",
-    "color": "#3b82f6",
+    "title": "Model",
+    "color": "#e82121",
     "skills": [
       {
         "name": "Blender",
-        "pct": 90
-      },
-      {
-        "name": "Maya",
         "pct": 85
       },
       {
-        "name": "ZBrush",
+        "name": "Substance Painter",
+        "pct": 85
+      },
+      {
+        "name": "Adobe Photoshop",
         "pct": 80
       },
       {
-        "name": "Substance Painter",
-        "pct": 88
+        "name": "SimpleBake",
+        "pct": 80
       },
       {
-        "name": "Three.js",
-        "pct": 82
+        "name": "C4D",
+        "pct": 40
       },
       {
-        "name": "WebGL",
-        "pct": 78
+        "name": "UV",
+        "pct": 84
       }
     ]
   },
   {
     "title": "Unity 开发",
-    "color": "#10b981",
+    "color": "#88a80b",
     "skills": [
       {
         "name": "Unity",
-        "pct": 92
-      },
-      {
-        "name": "C#",
-        "pct": 88
-      },
-      {
-        "name": "Shader Graph",
         "pct": 80
       },
       {
-        "name": "URP/HDRP",
-        "pct": 85
+        "name": "Shader Graph",
+        "pct": 60
+      },
+      {
+        "name": "URP",
+        "pct": 80
       },
       {
         "name": "Animator",
-        "pct": 82
+        "pct": 55
       },
       {
-        "name": "Particle System",
-        "pct": 78
+        "name": "HDRP",
+        "pct": 67
+      },
+      {
+        "name": "TimeLine",
+        "pct": 67
       }
     ]
   }
@@ -177,11 +169,6 @@ export const projects = [
         "type": "video",
         "src": "assets/videos/恒大液压.mp4",
         "poster": ""
-      },
-      {
-        "type": "image",
-        "src": "",
-        "poster": ""
       }
     ]
   }
@@ -189,22 +176,22 @@ export const projects = [
 
 export const experiences = [
   {
-    "period": "2023.06 - 至今",
-    "title": "高级前端开发工程师",
-    "company": "科技有限公司",
-    "desc": "负责核心产品前端架构设计，主导 3D 可视化平台开发，带领 5 人团队交付多个重点项目。"
+    "period": "2024.08 - 至今",
+    "title": "3D设计师",
+    "company": "郑州恒达智控科技股份有限公司",
+    "desc": "1、 负责根据CAD图纸、扫描数据或参考图，在Blender中进行中低多边形模型的创建、重构与减面优化，完成模型的重新拓扑与几何清理。\n\n2、模型性能适配方案，通过精简面数、优化网格结构，确保模型在移动端、VR及PC等多平台Unity项目中均能高效运行。\n\nPBR材质贴图制作：\n\n 1、独立负责全套PBR材质贴图的生产流程。\n\n2、在Blender中完成UV智能展开与合理布局后，于Substance Painter中绘制并生成高精度基础色、法线、金属度、粗糙度等贴图，确保资产写实风格统一与质感表现。\n\nUnity引擎整合与资源管理：\n\n1、将模型与贴图资源系统化导入Unity，配置材质球（URP/标准管线）并调整Shader参数，实现设计预期的视觉表现。\n\n2、 高效整合美术资源，创建模块化、可复用的预制体，并管理其层级结构，为场景搭建和程序调用提供标准化支持。\n\n3、引擎内效果实现与技术支持：\n\n   （1） 运用Unity动画系统、粒子系统及基础Shader编程，制作并实现模型动态效果、交互反馈及环境特效。\n\n   （2）参与场景灯光与后期处理调试，负责美术资源在引擎内的性能与视觉表现优化，提升项目整体视觉质量\n\n核心技能\n\n1、三维建模与优化：精通Blender，擅长高模转低模、重新拓扑、模型减面与几何修复。\n\n2、贴图与材质：精通Substance Painter的PBR贴图绘制流程，熟悉UV展开原理与最佳实践。\n\n3、引擎整合：精通Unity引擎的美术资源导入、配置、材质系统及预制体工作流。\n\n4、工作流：拥有清晰的 “Blender → Substance Painter → Unity”三维资产生产与落地全流程实践经验。"
   },
   {
-    "period": "2021.03 - 2023.05",
-    "title": "全栈开发工程师",
-    "company": "互联网有限公司",
-    "desc": "参与电商平台全栈开发，完成系统架构升级，优化首屏加载性能。"
+    "period": "2022.04 - 2024.07",
+    "title": "3D设计师",
+    "company": "河南鸿视新技术有限公司",
+    "desc": " 一、同后端部门开会制定方向\n \n1、根据客户需求，前期搭建模型与定位效果渲染。\n2、配合公司 UI  制作 Demo ，完成客户渲染图。\n3、配合公司后端程序与工程设计师，完成初版数据可视化交互效果展示。\n4、公司同时推进项目时，做好人员规划，合理安排时间，合同期内完成！\n二、同经理探讨产品定位\n1、策划和设定，制作所需的3D资源，在把握整体风格的前提下根据 UI  与后端设计稿进行3D场景建模\n2、贴图绘制、渲染出图以及适当的后期处理\n3、场景素材的收集制作和整理\n4、展览展示道具的设计，控制多种材料和色彩的组合运用及整体效果的搭配\n三、把控项目进程\n 每周同客户汇报并进行进度记录，合同期内完成全部项目\n 采集信息，与后端沟通并及时调整\n "
   },
   {
-    "period": "2019.07 - 2021.02",
-    "title": "前端开发工程师",
-    "company": "数字科技工作室",
-    "desc": "负责多个客户项目的 Web 端开发，使用 React 和 Vue 构建响应式应用。"
+    "period": "2020.08 - 2022.02",
+    "title": "三维模型师",
+    "company": "郑州利维机械设备有限公司",
+    "desc": "在职期间担任三维模型师，主要使用 Blender、Photoshop 完成产品建模、材质贴图、灯光布景及场景烘培，输出高质量三维视觉素材。\n• 协助经理制作企业产品图册，通过精细的模型表现与渲染品质，提升客户满意度，彰显公司产品的工艺与专业度。\n• 基于 Blender PBR 工作流程，独立完成贴图绘制与材质调节，与平面、电商团队协作，参与阿里巴巴国际站精品店铺装修及产品包装设计，提供符合商业需求的渲染图。\n• 主动与经理、运营沟通产品卖点，根据反馈把控模型精度与渲染进度，确保三维呈现效果贴合营销策略。\n• 使用 Blender完成养殖设备、精品茶具等产品的精细化建模，全方位展示杯体结构、表面质感与细节特征，并设计全英文产品包装，增强品牌辨识度，提升买家复购率。"
   }
 ];
 
