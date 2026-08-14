@@ -700,16 +700,34 @@ nav button:focus,
 
 /* ============================================================
    多行富文本段落(简介/职责描述等)
-   - 数据源换行结构由 RichText 组件保留,这里统一段落间距与行高
+   - 数据源换行结构由 RichText 组件保留
+   - 间距分层:列表项之间小间距(0.3em),普通段落边界大间距(0.85em),
+     由相邻兄弟选择器按行类型自动区分;二级编号行缩进
    ============================================================ */
 
 .rich-text-para {
   line-height: 1.9;
-  margin-bottom: 0.85em;
 }
 
-.rich-text-para:last-child {
-  margin-bottom: 0;
+.rich-text-para + .rich-text-para {
+  margin-top: 0.85em;
+}
+
+.rich-text-para + .rich-text-para-list,
+.rich-text-para-list + .rich-text-para {
+  margin-top: 0.85em;
+}
+
+.rich-text-para-list + .rich-text-para-list {
+  margin-top: 0.3em;
+}
+
+.rich-text-para-list {
+  line-height: 1.75;
+}
+
+.rich-text-para-sub {
+  padding-left: 1.6em;
 }
 
 /* ============================================================
