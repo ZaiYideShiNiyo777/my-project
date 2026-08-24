@@ -1,0 +1,156 @@
+<view class="page">
+  <!-- 顶部统计：件数 + 当前总价（所有商品自动统计） -->
+  <view class="stat-bar">
+    <view class="stat-left">
+      <text class="stat-num">{{total}}</text>
+      <text class="stat-label">件商品价格笔记</text>
+    </view>
+    <view class="stat-total">
+      <text class="stat-total-label">合计</text>
+      <text class="stat-total-num">{{totalText}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-dot"></view>
+  </view>
+
+  <block wx:else>
+    <!-- 商品卡片列表 -->
+    <view class="card price-card" wx:for="{{list}}" wx:key="_id">
+      <view class="price-main" data-id="{{item._id}}" bindtap="onEditPrice">
+        <view class="price-left">
+          <view class="price-name">{{item.content}}</view>
+          <view class="price-sub">
+            <view class="price-platform" wx:if="{{item.platform}}">
+              <image class="price-platform-icon" src="{{icon.tag}}"/>
+              <text>{{item.platform}}</text>
+            </view>
+            <text class="price-last" wx:if="{{item.lastText}}">上次 {{item.lastText}} {{item.diffText}}</text>
+            <text class="price-first" wx:else>暂无价格变动记录</text>
+          </view>
+        </view>
+        <view class="price-right">
+          <view class="price-current">{{item.currentText}}</view>
+          <view class="price-arrow" data-id="{{item._id}}" catchtap="onToggleHistory">
+            <image class="price-arrow-icon" src="{{expandedId === item._id ? icon.chevronUp : icon.chevronDown}}"/>
+          </view>
+        </view>
+      </view>
+
+      <view class="price-ops">
+        <button class="op-btn op-share" open-type="share" data-id="{{item._id}}" data-name="{{item.content}}">
+          <image class="op-btn-icon" src="{{icon.share}}"/>分享
+        </button>
+        <view class="op-btn op-del" data-id="{{item._id}}" catchtap="onDelete">
+          <image class="op-btn-icon" src="{{icon.trash}}"/>删除
+        </view>
+      </view>
+
+      <!-- 价格历史时间线（展开） -->
+      <view class="history" wx:if="{{expandedId === item._id}}">
+        <view wx:if="{{historyLoading}}" class="loading-wrap">
+          <view class="loading-dot"></view>
+        </view>
+        <view class="history-item" wx:for="{{histories}}" wx:for-item="h" wx:key="_id">
+          <view class="history-dot"></view>
+          <view class="history-content">
+            <view class="history-price">
+              <text>{{h.oldText}}</text>
+              <image class="history-arrow" src="{{icon.chevronRight}}" mode="aspectFit" />
+              <text>{{h.newText}}</text>
+            </view>
+            <text class="history-time">{{h.timeText}}</text>
+          </view>
+        </view>
+        <view class="empty-text history-empty" wx:if="{{!historyLoading && histories.length === 0}}">
+          暂无价格变动记录
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{list.length === 0}}">
+      <image class="empty-icon-img" src="{{icon.coin}}"/>
+      <view class="empty-text">还没有价格笔记</view>
+      <view class="empty-add-btn" bindtap="openForm">
+        <image class="empty-add-btn-icon" src="{{icon.plus}}" mode="aspectFit" />
+        <text>添加第一个商品</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 右下角 FAB：新增商品入口（带文字，明确可点） -->
+  <view class="fab" bindtap="openForm">
+    <image class="fab-icon" src="{{icon.plus}}"/>
+    <text class="fab-text">添加商品</text>
+  </view>
+
+  <!-- 新增商品表单弹层 -->
+  <view class="sheet-mask" wx:if="{{showForm}}" bindtap="closeForm"></view>
+  <view
+    class="sheet"
+    wx:if="{{showForm}}"
+    style="bottom: {{keyboardHeight ? keyboardHeight + 'px' : 0}}; max-height: {{keyboardHeight ? 'calc(100vh - ' + keyboardHeight + 'px)' : '80vh'}}"
+  >
+    <view class="sheet-title">添加商品价格</view>
+    <!-- 输入区可滚动：键盘弹起或内容较多时，底部保存按钮始终可见 -->
+    <scroll-view scroll-y class="sheet-body form-body">
+      <view class="form-required"><text class="req-star">*</text> 为必填项</view>
+      <input
+        class="input form-input"
+        placeholder="商品名 *（如：三只松鼠坚果礼盒）"
+        value="{{form.name}}"
+        bindinput="onFormName"
+        cursor-spacing="20"
+      />
+      <input
+        class="input form-input"
+        type="digit"
+        placeholder="当前价格 *（元，如：89.9）"
+        value="{{form.price}}"
+        bindinput="onFormPrice"
+        cursor-spacing="20"
+        confirm-type="done"
+        bindconfirm="confirmForm"
+      />
+    </scroll-view>
+    <view class="sheet-foot">
+      <view class="btn-primary btn-block form-save" bindtap="confirmForm">
+        <image class="btn-check-icon" src="{{icon.check}}"/>保存
+      </view>
+    </view>
+  </view>
+
+  <!-- 修改价格弹层：点击商品卡片弹出，只输入一个数字（价格金额）即可保存 -->
+  <view class="sheet-mask" wx:if="{{showEditPrice}}" bindtap="closeEditPrice"></view>
+  <view
+    class="sheet sheet-sm"
+    wx:if="{{showEditPrice}}"
+    style="bottom: {{keyboardHeight ? keyboardHeight + 'px' : 0}}"
+  >
+    <view class="sheet-title">修改价格</view>
+    <view class="edit-price-name">{{editPriceName}}</view>
+    <view class="edit-price-current">当前价格 {{editPriceCurrent}} · 输入新价格即可保存</view>
+    <view class="edit-price-wrap">
+      <text class="edit-price-symbol">¥</text>
+      <input
+        class="edit-price-input"
+        type="digit"
+        placeholder="输入新价格"
+        value="{{editPriceValue}}"
+        bindinput="onEditPriceInput"
+        focus="{{editPriceFocus}}"
+        cursor-spacing="20"
+        confirm-type="done"
+        bindconfirm="confirmEditPrice"
+      />
+    </view>
+    <view class="sheet-foot sheet-actions">
+      <view class="btn-ghost btn-flex" bindtap="closeEditPrice">取消</view>
+      <view class="btn-primary btn-flex" bindtap="confirmEditPrice">
+        <image class="btn-check-icon" src="{{icon.check}}"/>保存
+      </view>
+    </view>
+  </view>
+</view>

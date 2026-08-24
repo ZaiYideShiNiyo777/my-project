@@ -1,0 +1,9 @@
+{
+  "name": "seedFoods",
+  "version": "1.0.0",
+  "description": "生活胶囊：向 foods_library 导入 100 条预制食物数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

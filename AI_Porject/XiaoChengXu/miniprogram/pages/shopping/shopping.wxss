@@ -1,0 +1,724 @@
+page {
+  background-color: #f0f5ff; /* 页面蓝白底：与蓝色金融卡片系统一（参考 Meela 银行 UI 白色背景） */
+}
+
+.page {
+  padding-bottom: calc(200rpx + env(safe-area-inset-bottom));
+}
+
+/* ---------- 顶部成员条 ---------- */
+.member-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx 0;
+}
+
+/* 标题行：线条购物袋图标 + 标题文字 */
+.member-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.member-title-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+.member-bar-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+/* ---------- 搜索框 ---------- */
+.search-bar {
+  padding: 20rpx 24rpx 4rpx;
+}
+
+/* 搜索图标定位于输入框左侧，输入文字避开图标 */
+.search-box {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 28rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32rpx;
+  height: 32rpx;
+  z-index: 1;
+  opacity: 0.85;
+}
+
+.search-input {
+  width: 100%;
+  padding-left: 76rpx;
+}
+
+/* ---------- 区块 ---------- */
+.section {
+  margin-top: 12rpx;
+}
+
+.section-title {
+  padding: 20rpx 32rpx 4rpx;
+  font-size: 24rpx;
+  color: var(--text-sub);
+}
+
+/* ---------- 日期组头 ---------- */
+.group-head {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 24rpx 0; /* 左侧与卡片对齐，视觉节奏统一 */
+}
+
+/* 组头日期：线条日历图标 + 日期文本 */
+.group-calendar-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.group-date-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* 完成进度胶囊：浅蓝底深蓝字，一眼看清该日进度 */
+.group-count {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  border-radius: 20rpx;
+  padding: 2rpx 16rpx;
+  margin-left: 16rpx;
+}
+
+/* 组头右侧操作区：分享为主操作，删除弱化 */
+.group-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 0;
+}
+
+/* 整组删除：仅全部完成后出现，灰色小图标弱化处理（危险操作不醒目） */
+.group-del {
+  width: 52rpx;
+  height: 52rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s ease;
+}
+
+.group-del:active {
+  background: #f2f3f5;
+}
+
+.group-del-icon {
+  width: 34rpx;
+  height: 34rpx;
+  opacity: 0.75;
+}
+
+/* 组头分享按钮：主操作，浅蓝胶囊 + 线条分享图标 + 文字 */
+.group-share {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 28rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  height: 52rpx;
+  line-height: 52rpx;
+  padding: 0 22rpx;
+  margin: 0;
+  flex-shrink: 0;
+  border: none;
+}
+
+.group-share::after {
+  border: none;
+}
+
+.group-share:active {
+  background: var(--primary-dark);
+}
+
+.group-share-icon {
+  width: 28rpx;
+  height: 28rpx;
+  line-height: 1;
+}
+
+/* ---------- 清单条目：浅蓝卡片，圆角/阴影与饮食页统一 ---------- */
+.item {
+  display: flex;
+  align-items: center;
+  margin: 16rpx 24rpx;
+  padding: 24rpx;
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.18);
+  border-radius: 12rpx;
+  box-shadow: 0 4rpx 16rpx rgba(30, 94, 255, 0.06); /* 柔和蓝色投影：卡片从蓝白底中浮起 */
+  transition: background 0.15s ease;
+}
+
+/* 卡片按压反馈：点击标题/空白处打开详情时有明确视觉提示 */
+.item:active {
+  background: #d8e5ff;
+}
+
+.checkbox {
+  width: 44rpx;
+  height: 44rpx;
+  border: 3rpx solid #c8cdd4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.checkbox.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+/* 预览勾选对勾：白色线条图标（选中态蓝底） */
+.checkbox-icon {
+  width: 24rpx;
+  height: 24rpx;
+}
+
+.item-main {
+  flex: 1;
+  margin-right: 20rpx;
+  overflow: hidden;
+}
+
+/* 总标题行：绿色竖条装饰 + 任务名（层级高于物品子项） */
+.item-title-row {
+  display: flex;
+  align-items: center;
+}
+
+.item-title-bar {
+  width: 8rpx;
+  height: 32rpx;
+  border-radius: 4rpx;
+  background: var(--primary);
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.item-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* 任务标题下方：物品竖排列表（每条独占一行，行尾绿色圆圈勾选） */
+.item-lines {
+  margin-top: 14rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 6rpx 20rpx;
+}
+
+.item-line {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 0; /* 行高加大：点击区域更舒适 */
+  border-bottom: 1rpx solid #eef0f2;
+}
+
+/* 整行可点勾选：按压时浅蓝反馈 */
+.item-line:active {
+  background: rgba(30, 94, 255, 0.08);
+  border-radius: 12rpx;
+}
+
+.item-line:last-child {
+  border-bottom: none;
+}
+
+.item-line-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--text-main);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 行尾蓝色圆圈：点击后该物品完成（文字置灰删除线 + 圆圈变灰），状态写入 items[n].done */
+.item-line-check {
+  width: 44rpx;
+  height: 44rpx;
+  border: 3rpx solid var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin-left: 20rpx;
+  transition: all 0.15s ease; /* 勾选/取消时圆圈过渡自然 */
+}
+
+/* 行内完成对勾：白色线条图标（完成态蓝底） */
+.item-line-check-icon {
+  width: 22rpx;
+  height: 22rpx;
+}
+
+.item-line-check:active {
+  transform: scale(0.88);
+}
+
+.item-line-check.checked {
+  background: var(--primary); /* 完成：圆圈变蓝实底白勾 */
+  border-color: var(--primary);
+}
+
+.item-line.done .item-line-name {
+  color: var(--text-sub);
+  text-decoration: line-through;
+}
+
+.item-cook {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin-top: 8rpx;
+}
+
+/* 右侧操作区：分享 + 删除 竖向排列，按钮为竖向长方形（小圆角非胶囊） */
+.item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+/* 竖向长方形按钮：图标在上、文字在下（分享/删除同为 button，尺寸完全一致） */
+.item-act {
+  width: 72rpx;
+  height: 88rpx;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  line-height: 1;
+  border-radius: 10rpx;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.item-act::after {
+  border: none;
+}
+
+.item-act-icon {
+  width: 30rpx;
+  height: 30rpx;
+  flex-shrink: 0;
+}
+
+.item-act-text {
+  line-height: 1;
+  font-size: 20rpx;
+}
+
+/* 分享：蓝色底白图标白字（主操作，延续蓝色主色调） */
+.item-share {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.28);
+}
+
+.item-share:active {
+  background: var(--primary-dark);
+  transform: scale(0.94);
+}
+
+/* 删除：红色实底白图标白字（主操作，与分享按钮蓝色实底呼应） */
+.item-del {
+  background: var(--danger);
+  color: #fff;
+  box-shadow: 0 4rpx 12rpx rgba(230, 67, 64, 0.28);
+}
+
+.item-del:active {
+  background: #c9302c;
+  transform: scale(0.94);
+}
+
+/* ---------- 已购买：置灰 + 缩小 ---------- */
+.item.done {
+  opacity: 0.6;
+}
+
+.item.done .item-name {
+  font-size: 26rpx;
+  text-decoration: line-through;
+}
+
+/* 已完成卡片：蓝色竖条变灰，完成状态一目了然 */
+.item.done .item-title-bar {
+  background: #c8cdd4;
+}
+
+.item.done .item-cook {
+  font-size: 20rpx;
+}
+
+/* ---------- 底部固定添加按钮 ---------- */
+.bottom-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(124rpx + env(safe-area-inset-bottom)); /* 高于自定义 tabBar，避免被遮挡 */
+  background: #fff;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.05);
+  z-index: 100;
+}
+
+.add-bar-btn {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 44rpx;
+  height: 84rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 6rpx 20rpx rgba(30, 94, 255, 0.3);
+}
+
+/* 底部添加按钮：白色线条加号图标 */
+.add-bar-btn-icon {
+  width: 34rpx;
+  height: 34rpx;
+}
+
+.add-bar-btn:active {
+  opacity: 0.9;
+}
+
+/* 主按钮内白色对勾图标（线条风） */
+.btn-check-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+  display: inline-block;
+  vertical-align: -5rpx;
+}
+
+/* ---------- 批量添加弹层 ---------- */
+.batch-tip {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+/* 任务总标题输入框：弹层顶部醒目位置 */
+.task-title-input {
+  margin-bottom: 20rpx;
+}
+
+/* 预览步骤的任务标题：线条图钉图标 + 标题，与下方物品列表层级分明 */
+.preview-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-light);
+  border-radius: 12rpx;
+  padding: 12rpx 20rpx;
+  margin-bottom: 16rpx;
+  word-break: break-all;
+}
+
+.preview-pin-icon {
+  width: 30rpx;
+  height: 30rpx;
+  flex-shrink: 0;
+}
+
+.batch-list {
+  flex: 1 1 0;
+  height: 0; /* 弹层超高时在内部滚动，底部按钮不被挤出（配合全局 .sheet 固定高度） */
+  min-height: 0;
+}
+
+.batch-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+/* 预览行：可点击勾选（勾选后置灰） */
+.preview-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 8rpx;
+  border-bottom: 1rpx solid #f5f6f8;
+}
+
+.preview-row:active {
+  background: #fafbfc;
+}
+
+.preview-row.done {
+  opacity: 0.55;
+}
+
+.preview-row.done .preview-name {
+  text-decoration: line-through;
+  color: var(--text-sub);
+}
+
+.preview-name {
+  flex: 1;
+  margin-left: 20rpx;
+  font-size: 28rpx;
+}
+
+.batch-input {
+  flex: 1;
+}
+
+.batch-del {
+  width: 56rpx;
+  height: 56rpx;
+  margin-left: 16rpx;
+  border-radius: 50%;
+  background: #f2f3f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* 删除行：灰色线条叉号图标 */
+.batch-del-icon {
+  width: 26rpx;
+  height: 26rpx;
+  opacity: 0.75;
+}
+
+.add-row-btn {
+  margin-top: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+  color: var(--primary);
+  padding: 16rpx 0;
+}
+
+/* 添加一行：蓝色线条加号图标 */
+.add-row-btn-icon {
+  width: 26rpx;
+  height: 26rpx;
+}
+
+.batch-save {
+  margin-top: 16rpx;
+}
+
+/* ---------- 清单详情弹层 ---------- */
+.detail-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto; /* 内容超高时内部滚动，底部按钮与删除入口不被裁切 */
+  padding: 8rpx 8rpx 0;
+}
+
+.detail-name {
+  font-size: 38rpx;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+/* 详情内物品列表：每项带完成状态，点击行尾圆圈直接勾选；超高时内部滚动 */
+.detail-items {
+  margin-top: 16rpx;
+  background: #f7f8fa;
+  border-radius: 12rpx;
+  padding: 8rpx 20rpx;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid #eef0f2;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+/* 详情行勾选：空圈可点；完成态蓝底白对勾（线条图标，与列表行勾选同风格） */
+.detail-item-check {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #c8cdd4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  margin-right: 16rpx;
+}
+
+.detail-item-check.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.detail-item-check-icon {
+  width: 22rpx;
+  height: 22rpx;
+}
+
+.detail-item-name {
+  font-size: 26rpx;
+}
+
+.detail-item.done .detail-item-name {
+  text-decoration: line-through;
+  color: var(--text-sub);
+}
+
+.detail-tag-row {
+  display: flex;
+  margin: 20rpx 0 8rpx;
+}
+
+.detail-tag {
+  font-size: 22rpx;
+  border-radius: 20rpx;
+  padding: 4rpx 20rpx;
+  margin-right: 14rpx;
+}
+
+.tag-todo {
+  background: #f0f2f5;
+  color: var(--text-sub);
+}
+
+.tag-done {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.tag-cat {
+  background: #fdf3e7;
+  color: #c97b1e;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f5f6f8;
+}
+
+/* 详情标签：线条图标 + 文字（替换 emoji） */
+.detail-label {
+  width: 180rpx;
+  font-size: 26rpx;
+  color: var(--text-sub);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.detail-label-icon {
+  width: 28rpx;
+  height: 28rpx;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.detail-value {
+  flex: 1;
+  font-size: 26rpx;
+  word-break: break-all;
+}
+
+/* 详情弹层删除入口：红色线条垃圾桶图标 + 文字，危险操作二次确认 */
+.detail-delete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 24rpx 0 8rpx;
+  font-size: 26rpx;
+  color: #e64340;
+  flex-shrink: 0;
+}
+
+.detail-delete:active {
+  opacity: 0.7;
+}
+
+.detail-delete-icon {
+  width: 28rpx;
+  height: 28rpx;
+}
+
+/* 返回修改：蓝色线条左箭头图标 */
+.btn-back-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-right: 8rpx;
+  vertical-align: -4rpx;
+}
+
+/* ---------- 空状态：线条购物袋图标（替换 emoji） ---------- */
+.empty-icon-img {
+  width: 120rpx;
+  height: 120rpx;
+  margin-bottom: 24rpx;
+  opacity: 0.35;
+}

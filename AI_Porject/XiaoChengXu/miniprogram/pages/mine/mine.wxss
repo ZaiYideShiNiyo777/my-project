@@ -1,0 +1,285 @@
+.page {
+  padding-bottom: 60rpx;
+}
+
+/* ---------- 用户卡片：白色背景改为浅蓝卡片 ---------- */
+.user-card {
+  display: flex;
+  align-items: center;
+  margin-top: 24rpx;
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+}
+
+.user-avatar {
+  width: 104rpx;
+  height: 104rpx;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 44rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  margin-left: 24rpx;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.user-tip {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin-top: 6rpx;
+}
+
+.user-edit {
+  width: 34rpx;
+  height: 34rpx;
+  padding: 14rpx; /* 扩大点击区：点铅笔图标修改昵称 */
+  flex-shrink: 0;
+}
+
+/* ---------- 浮窗指引 ---------- */
+.guide-card {
+  background: linear-gradient(135deg, #eaf1ff, #dce8ff);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+}
+
+.guide-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1748cc;
+  display: flex;
+  align-items: center;
+}
+
+.guide-title-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.guide-text {
+  font-size: 24rpx;
+  color: #1748cc;
+  margin-top: 10rpx;
+  line-height: 1.6;
+}
+
+/* ---------- 区块标题 ---------- */
+.section-title {
+  padding: 28rpx 32rpx 8rpx;
+  font-size: 26rpx;
+  color: var(--text-sub);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.section-title-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+/* ---------- 受邀人管理（按模块分类）：白色背景改为浅蓝卡片 ---------- */
+.invite-group {
+  margin: 16rpx 24rpx;
+  padding: 24rpx;
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+}
+
+.ig-head {
+  display: flex;
+  align-items: center;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid rgba(30, 94, 255, 0.15);
+}
+
+.ig-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.ig-title-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.ig-count {
+  margin-left: auto;
+  font-size: 22rpx;
+  color: var(--text-sub);
+}
+
+.ig-empty {
+  font-size: 24rpx;
+  color: #b6bcc6;
+  padding: 24rpx 0 8rpx;
+}
+
+.ig-item {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0 4rpx;
+}
+
+.ig-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 28rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ig-info {
+  flex: 1;
+  margin-left: 20rpx;
+  min-width: 0;
+}
+
+.ig-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ig-time {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-top: 4rpx;
+}
+
+.ig-status {
+  font-size: 22rpx;
+  padding: 4rpx 18rpx;
+  border-radius: 24rpx;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+.ig-status.ok {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.ig-status.pending {
+  background: #f2f3f5;
+  color: var(--text-sub);
+}
+
+.ig-remove {
+  font-size: 22rpx;
+  color: var(--danger);
+  padding: 8rpx 4rpx 8rpx 16rpx;
+  flex-shrink: 0;
+}
+
+/* ---------- 订阅设置：双时段可选（浅蓝卡片 + 白底时段列表） ---------- */
+.setting-card {
+  margin-top: 32rpx;
+  padding: 24rpx;
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+}
+
+.setting-head {
+  margin-bottom: 4rpx;
+}
+
+.setting-label {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+}
+
+.setting-label-icon {
+  width: 30rpx;
+  height: 30rpx;
+  margin-right: 10rpx;
+  flex-shrink: 0;
+}
+
+.setting-desc {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin-top: 8rpx;
+  line-height: 1.5;
+}
+
+.setting-options {
+  margin-top: 16rpx;
+  background: #fff;
+  border-radius: var(--radius);
+  border: 1rpx solid rgba(30, 94, 255, 0.12);
+  overflow: hidden;
+}
+
+.setting-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+}
+
+.setting-option + .setting-option {
+  border-top: 1rpx solid rgba(30, 94, 255, 0.08);
+}
+
+.option-time {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.option-tip {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-top: 4rpx;
+}
+
+.setting-note {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-top: 16rpx;
+  line-height: 1.5;
+}
+
+/* ---------- 昵称编辑弹层 ---------- */
+.nickname-tip {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.nickname-input {
+  width: 100%;
+}

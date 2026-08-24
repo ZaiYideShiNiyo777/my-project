@@ -1,0 +1,474 @@
+page {
+  background-color: #f0f5ff; /* 页面蓝白底：与蓝色金融卡片系统一（参考 Meela 银行 UI 白色背景） */
+}
+
+.page {
+  padding-bottom: 40rpx;
+}
+
+/* ---------- 周切换条（白色圆角卡片 + 蓝色箭头） ---------- */
+.week-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 20rpx 24rpx 4rpx;
+  padding: 12rpx 20rpx;
+  background: #fff;
+  border: 1rpx solid rgba(30, 94, 255, 0.15);
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 左侧：上一周 + 周范围；右侧：下一周 */
+.week-left,
+.week-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.week-arrow {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  border-radius: 50%;
+  transition: background 0.15s ease;
+}
+
+/* 周切换箭头：线条左/右箭头图标 */
+.week-arrow-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.week-arrow:active {
+  background: #d8e5ff;
+}
+
+.week-label {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* ---------- 7 天日期条：白底卡片内 7 格，选中实底高亮、今天有标记，可横向滚动 ---------- */
+.day-strip-scroll {
+  margin: 16rpx 24rpx 0;
+  padding: 12rpx 16rpx;
+  background: #fff;
+  border: 1rpx solid rgba(30, 94, 255, 0.15);
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+}
+
+.day-strip {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+/* 单格：星期/今天 + 月日，两行居中；选中实底蓝白字，今天非选中时浅蓝底 */
+.day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 92rpx;
+  height: 84rpx;
+  border-radius: 10rpx;
+  transition: background 0.15s ease;
+}
+
+.day-cell-label {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  line-height: 1.3;
+}
+
+.day-cell-date {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-top: 4rpx;
+  line-height: 1.2;
+}
+
+/* 今天但未选中：浅蓝底提示“今天在这”；选中后与选中态合并 */
+.day-cell.today:not(.selected) {
+  background: var(--primary-light);
+}
+
+.day-cell.today:not(.selected) .day-cell-label {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 选中日：蓝色实底 + 白字 */
+.day-cell.selected {
+  background: var(--primary);
+  box-shadow: 0 4rpx 12rpx rgba(30, 94, 255, 0.3);
+}
+
+.day-cell.selected .day-cell-label,
+.day-cell.selected .day-cell-date {
+  color: #fff;
+}
+
+.day-cell:active {
+  opacity: 0.85;
+}
+
+/* ---------- 周滚动区 ---------- */
+.week-scroll {
+  /* 上方周切换条 + 日期条，滚动区留足余量，底部不被 tabBar 遮挡 */
+  height: calc(100vh - 330rpx - env(safe-area-inset-bottom));
+}
+
+/* ---------- 每日卡片：浅蓝卡片，四餐整合分区、层次分明 ---------- */
+.day-card {
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+  border-radius: 12rpx;
+  margin: 20rpx 24rpx;
+  padding: 24rpx 24rpx 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(30, 94, 255, 0.06);
+  transition: border-color 0.2s ease;
+}
+
+/* 日期条点击定位到的卡片：蓝色描边高亮，一眼看到目标日 */
+.day-card.focused {
+  border: 2rpx solid var(--primary);
+  box-shadow: 0 4rpx 16rpx rgba(30, 94, 255, 0.18);
+}
+
+/* 日期标题行：卡片内部顶部明确标注对应日期，与下方餐次分区用分割线隔开 */
+.day-head {
+  display: flex;
+  align-items: center;
+  border-bottom: 1rpx solid rgba(30, 94, 255, 0.15);
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 完整日期：周日 8月23日（星期 + 月 + 日，格式统一、一目了然） */
+.day-date {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.today-badge {
+  margin-left: 16rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  border-radius: 20rpx;
+  padding: 2rpx 16rpx;
+}
+
+/* 当日总热量：线条火焰图标 + 数字 */
+.day-kcal {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 22rpx;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.day-kcal-icon {
+  width: 26rpx;
+  height: 26rpx;
+}
+
+/* ---------- 四餐整合分区：白色圆角分区嵌于蓝色卡片内，主次清晰 ---------- */
+.meal-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.meal-block {
+  background: #fff; /* 白色分区底，与蓝色卡片主体区分，去描边减少视觉干扰 */
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx 16rpx;
+  margin-bottom: 20rpx; /* 分区之间间距，层级分明 */
+}
+
+.meal-block:last-child {
+  margin-bottom: 0;
+}
+
+.meal-block:active {
+  background: #f0f5ff;
+}
+
+/* 真机按压反馈：hover-class 对应样式（:active 在部分真机不可靠，双保险） */
+.meal-block-hover {
+  background: #f0f5ff;
+  transform: scale(0.99);
+}
+
+.meal-block-head {
+  display: flex;
+  align-items: center;
+}
+
+.meal-icon {
+  width: 34rpx;
+  height: 34rpx;
+  margin-right: 14rpx;
+  flex-shrink: 0;
+}
+
+.meal-name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+/* 餐次时间段：蓝色实底胶囊醒目展示（四个餐次分区内均明显可见） */
+.meal-time {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  margin-left: 16rpx;
+  padding: 4rpx 18rpx;
+  border-radius: 20rpx;
+  flex-shrink: 0;
+}
+
+/* 餐次热量：线条火焰图标 + 数字 */
+.meal-kcal {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 24rpx;
+  color: var(--primary-dark);
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.meal-kcal-icon {
+  width: 26rpx;
+  height: 26rpx;
+}
+
+/* 分区内容：完整展示不裁切，行高加大避免文字挤作一团 */
+.meal-block-content {
+  font-size: 26rpx;
+  color: var(--text-main);
+  margin-top: 10rpx;
+  line-height: 1.7;
+  word-break: break-all;
+}
+
+.meal-block-content.empty-text {
+  color: #b9c0c8;
+  font-size: 24rpx;
+}
+
+.meal-block-foot {
+  display: flex;
+  align-items: center;
+  margin-top: 14rpx;
+}
+
+/* 编辑提示：线条铅笔图标 + 文字 */
+.meal-edit-hint-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-left: 16rpx;
+  opacity: 0.7;
+}
+
+.meal-edit-hint {
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin-left: 8rpx;
+}
+
+/* ---------- 内联编辑区：展开在当前餐次分区内（不弹窗），键盘弹起/小屏时随页面滚动完整可见 ---------- */
+.inline-edit {
+  margin-top: 16rpx;
+  background: #fff;
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+  border-radius: 12rpx;
+  padding: 20rpx 20rpx 8rpx;
+}
+
+.inline-edit-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--text-main);
+  text-align: center;
+  margin-bottom: 16rpx;
+}
+
+.inline-search {
+  margin-bottom: 4rpx;
+}
+
+/* 食物列表：固定高度内部滚动，内容多时不被裁切，底部操作区始终可见 */
+.inline-food-list {
+  height: 400rpx;
+  min-height: 0;
+  margin-top: 12rpx;
+  padding: 14rpx 0;
+  background: var(--primary-light);
+  border-radius: 12rpx;
+}
+
+/* 食物库加载中占位 */
+.food-list-loading {
+  padding: 70rpx 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-sub);
+}
+
+/* 食物项：分类小卡片（左侧分类徽章 + 信息 + 勾选），边界清晰、层级分明 */
+.food-item {
+  display: flex;
+  align-items: center;
+  margin: 0 14rpx 14rpx;
+  padding: 16rpx 20rpx;
+  background: #fff;
+  border: 1rpx solid rgba(30, 94, 255, 0.16);
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 8rpx rgba(30, 94, 255, 0.05);
+  transition: background 0.15s ease;
+}
+
+.food-item:last-child {
+  margin-bottom: 0;
+}
+
+.food-item:active {
+  background: var(--primary-light);
+}
+
+/* 分类徽章：浅蓝底 + 线条图标 + 分类名，一眼区分主食/肉蛋奶/蔬菜等 */
+.food-cat {
+  width: 92rpx;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  margin-right: 20rpx;
+  padding: 10rpx 4rpx;
+  background: var(--primary-light);
+  border-radius: 10rpx;
+}
+
+.food-cat-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.food-cat-label {
+  font-size: 18rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.food-check {
+  width: 40rpx;
+  height: 40rpx;
+  border: 3rpx solid #c8cdd4;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+/* 食物多选对勾：白色线条图标（选中态蓝底） */
+.food-check-icon {
+  width: 22rpx;
+  height: 22rpx;
+}
+
+.food-check.on {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.food-info {
+  flex: 1;
+}
+
+.food-name {
+  font-size: 28rpx;
+}
+
+.food-desc {
+  font-size: 22rpx;
+  color: var(--text-sub);
+}
+
+/* 每50g热量：深蓝高亮，与其他信息区分 */
+.food-kcal-50 {
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+
+.inline-custom {
+  margin-top: 16rpx;
+}
+
+.inline-custom-qty {
+  margin-top: 16rpx;
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 20rpx;
+  padding-bottom: 16rpx;
+}
+
+.inline-sum {
+  flex: 1;
+  font-size: 24rpx;
+  color: var(--text-sub);
+}
+
+.inline-btn {
+  height: 68rpx;
+  line-height: 68rpx;
+  padding: 0 36rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+/* ---------- 食物分类 chips：间距充足，分类清晰 ---------- */
+.chip-bar {
+  margin-top: 16rpx;
+  padding-bottom: 16rpx;
+}
+
+.chip-bar .chip {
+  padding: 12rpx 30rpx;
+  margin-right: 20rpx;
+  font-size: 26rpx;
+  display: flex;
+  align-items: center;
+}
+
+/* 分类 chip 线条图标（未选中灰 / 选中蓝） */
+.chip-icon {
+  width: 24rpx;
+  height: 24rpx;
+  margin-right: 6rpx;
+  flex-shrink: 0;
+}

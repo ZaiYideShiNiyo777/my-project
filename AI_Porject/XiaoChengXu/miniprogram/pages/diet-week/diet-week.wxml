@@ -1,0 +1,179 @@
+<view class="page">
+  <!-- 顶部：周切换（线条箭头图标 + 本周/下周/上周 + 日期范围），可查看历史/未来任意一周 -->
+  <view class="week-bar">
+    <view class="week-left">
+      <view class="week-arrow" bindtap="prevWeek">
+        <image class="week-arrow-icon" src="{{icon.chevronLeft}}" mode="aspectFit" />
+      </view>
+      <view class="week-label">{{week.offsetLabel}} {{week.rangeLabel}}</view>
+    </view>
+    <view class="week-right">
+      <view class="week-arrow" bindtap="nextWeek">
+        <image class="week-arrow-icon" src="{{icon.chevronRight}}" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 7 天日期条：周一~周日 + 月日，哪格是哪天一目了然；点击某天滚动定位到对应卡片 -->
+  <scroll-view scroll-x class="day-strip-scroll" scroll-into-view="{{scrollInto}}" scroll-with-animation>
+    <view class="day-strip">
+      <view
+        id="daycell-{{item.date}}"
+        class="day-cell {{item.isSelected ? 'selected' : ''}} {{item.isToday ? 'today' : ''}}"
+        wx:for="{{weekDays}}"
+        wx:key="date"
+        data-date="{{item.date}}"
+        bindtap="onPickDay"
+      >
+        <text class="day-cell-label">{{item.isToday ? '今天' : item.label}}</text>
+        <text class="day-cell-date">{{item.monthDay}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-dot"></view>
+  </view>
+
+  <scroll-view wx:else scroll-y class="week-scroll" scroll-into-view="{{scrollInto}}" scroll-with-animation>
+    <!-- 每日卡片（周一~周日）：每张卡片顶部标注星期 + 月 + 日，日期条点击可定位到对应卡片 -->
+    <view class="day-card {{selectedDate === day.date ? 'focused' : ''}}" wx:for="{{week.days}}" wx:key="date" id="day-{{day.date}}">
+      <!-- 卡片内日期标题：星期 + 月 + 日，明确标注对应日期（多张卡片按日期排列互不混淆） -->
+      <view class="day-head">
+        <text class="day-date">{{day.dateFull}}</text>
+        <text class="today-badge" wx:if="{{day.isToday}}">今天</text>
+        <view class="day-kcal" wx:if="{{day.totalKcal > 0}}">
+          <image class="day-kcal-icon" src="{{icon.flame}}" mode="aspectFit" />
+          <text>合计 {{day.totalKcal}}kcal</text>
+        </view>
+      </view>
+
+      <!-- 三餐 + 其他：整合在同一张卡片内分区展示（分区标题行 + 内容区，主次清晰） -->
+      <view class="meal-list">
+        <view
+          class="meal-block"
+          hover-class="meal-block-hover"
+          hover-stay-time="80"
+          wx:for="{{mealTypes}}"
+          wx:for-item="meal"
+          wx:key="key"
+        >
+          <!-- 分区标题行：icon + 餐次名 + 时间（点击展开内联编辑） -->
+          <view
+            class="meal-block-head"
+            data-date="{{day.date}}"
+            data-meal="{{meal.key}}"
+            bindtap="onMealTap"
+          >
+            <image class="meal-icon" src="{{meal.icon}}" mode="aspectFit" />
+            <text class="meal-name">{{meal.label}}</text>
+            <text class="meal-time">{{meal.timeRange}}</text>
+            <view class="meal-kcal" wx:if="{{day.meals[meal.key].calories}}">
+              <image class="meal-kcal-icon" src="{{icon.flame}}" mode="aspectFit" />
+              <text>{{day.meals[meal.key].calories}}kcal</text>
+            </view>
+          </view>
+          <!-- 分区内容区：展示该餐计划吃什么（点击卡片制定这餐吃什么） -->
+          <view
+            class="meal-block-content {{day.meals[meal.key] ? '' : 'empty-text'}}"
+            data-date="{{day.date}}"
+            data-meal="{{meal.key}}"
+            bindtap="onMealTap"
+          >
+            {{day.meals[meal.key].content || '点击卡片规划这餐吃什么'}}
+          </view>
+          <!-- 分区脚部：编辑提示（纯计划页不设“已吃打卡”，聚焦提前制定吃什么）；点击同样展开编辑，扩大热区 -->
+          <view
+            class="meal-block-foot"
+            data-date="{{day.date}}"
+            data-meal="{{meal.key}}"
+            bindtap="onMealTap"
+          >
+            <image class="meal-edit-hint-icon" src="{{icon.pencil}}" mode="aspectFit" />
+            <text class="meal-edit-hint">点击卡片直接修改</text>
+          </view>
+
+          <!-- 内联编辑区：展开在当前餐次分区内，食物多选 + 自定义输入一次保存（不弹窗） -->
+          <view
+            class="inline-edit"
+            wx:if="{{editMeal && day.date === editMeal.date && meal.key === editMeal.meal}}"
+            catchtap="onEditBlock"
+          >
+            <view class="inline-edit-title">编辑{{editMealLabel}} · {{meal.timeRange}}</view>
+            <input
+              class="input inline-search"
+              placeholder="搜索食物"
+              value="{{editKeyword}}"
+              bindinput="onEditFoodSearch"
+              cursor-spacing="10"
+            />
+            <scroll-view scroll-x class="chip-bar">
+              <view
+                class="chip {{editCategory === item.key ? 'active' : ''}}"
+                wx:for="{{foodCategories}}"
+                wx:key="key"
+                data-cat="{{item.key}}"
+                bindtap="onEditCategoryFilter"
+              >
+                <image wx:if="{{item.icon}}" class="chip-icon" src="{{editCategory === item.key ? item.iconActive : item.icon}}" />
+                <text>{{item.label}}</text>
+              </view>
+            </scroll-view>
+            <scroll-view scroll-y class="inline-food-list">
+              <!-- 食物库异步加载中：先占位提示，避免列表闪空 -->
+              <view class="food-list-loading" wx:if="{{editFoodsLoading}}">食物库加载中…</view>
+              <view
+                class="food-item"
+                wx:for="{{editFilteredFoods}}"
+                wx:key="name"
+                data-index="{{index}}"
+                bindtap="onEditFoodToggle"
+              >
+                <!-- 分类徽章：浅蓝底 + 线条图标 + 分类名，一眼区分主食/肉蛋奶/蔬菜等 -->
+                <view class="food-cat">
+                  <image class="food-cat-icon" src="{{item.catIcon}}" mode="aspectFit" />
+                  <text class="food-cat-label">{{item.catLabel}}</text>
+                </view>
+                <view class="food-info">
+                  <view class="food-name">{{item.name}}</view>
+                  <view class="food-desc">
+                    <text class="food-kcal-50" wx:if="{{item.kcal_per_50g}}">每50g {{item.kcal_per_50g}}kcal</text>
+                    <text wx:if="{{item.kcal_per_50g}}"> · </text>
+                    <text>{{item.standard_portion}} {{item.calories}}kcal</text>
+                  </view>
+                </view>
+                <view class="food-check {{editSelectedMap[item.name] ? 'on' : ''}}">
+                  <image wx:if="{{editSelectedMap[item.name]}}" class="food-check-icon" src="{{icon.checkWhite}}" />
+                </view>
+              </view>
+              <view class="empty" wx:if="{{!editFoodsLoading && editFilteredFoods.length === 0}}">
+                <view class="empty-text">没有找到食物，可直接在下方自定义输入</view>
+              </view>
+            </scroll-view>
+            <view class="inline-custom">
+              <input
+                class="input"
+                placeholder="自定义名称（如：自制沙拉）"
+                value="{{editCustomName}}"
+                bindinput="onEditCustomName"
+                cursor-spacing="10"
+              />
+              <input
+                class="input inline-custom-qty"
+                placeholder="数量（选填，如：2个、1杯、适量）"
+                value="{{editCustomQty}}"
+                bindinput="onEditCustomQty"
+                cursor-spacing="10"
+              />
+            </view>
+            <view class="inline-actions">
+              <text class="inline-sum">已选 {{editSelectedCount}} 项 · {{editSelectedKcal}}kcal</text>
+              <view class="btn-ghost inline-btn" catchtap="closeInlineEdit">取消</view>
+              <view class="btn-primary inline-btn" catchtap="confirmInlineEdit">保存</view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>

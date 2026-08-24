@@ -1,0 +1,267 @@
+<view class="page">
+  <!-- 顶部：线条图标 + 标题 + 协作者头像堆叠（邀请已下放到每条清单组头分享） -->
+  <view class="member-bar">
+    <view class="member-title-wrap">
+      <image class="member-title-icon" src="{{icon.bag}}" mode="aspectFit" />
+      <text class="member-bar-title">购物清单</text>
+    </view>
+    <view class="member-right">
+      <view class="member-stack" wx:if="{{memberList.length > 0}}">
+        <view class="member-avatar" wx:for="{{memberList}}" wx:key="openid">{{item.name.charAt(0)}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 搜索框：左侧线条搜索图标（替换 emoji） -->
+  <view class="search-bar">
+    <view class="search-box">
+      <image class="search-icon" src="{{icon.search}}" mode="aspectFit" />
+      <input class="input search-input" placeholder="搜索物品或做菜名" value="{{keyword}}" bindinput="onSearchInput" />
+    </view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-dot"></view>
+  </view>
+
+  <block wx:else>
+    <!-- 按添加日期自动分组：组头 = 日期 + 进度 + 分享，组内未完成在前、已完成置灰置底 -->
+    <view class="section" wx:for="{{groups}}" wx:key="date" wx:for-item="group">
+      <view class="group-head">
+        <!-- 日期：线条日历图标 + 文本，一眼可知是哪天 -->
+        <image class="group-calendar-icon" src="{{icon.calendar}}" mode="aspectFit" />
+        <text class="group-date-text">{{group.dateLabel}}</text>
+        <text class="group-count" wx:if="{{group.doneCount > 0}}">{{group.doneCount}}/{{group.count}} 已完成</text>
+        <!-- 组头右侧操作：分享为主操作（醒目胶囊），删除弱化为灰色小图标（仅整组完成后出现，点击需二次确认） -->
+        <view class="group-actions">
+          <view
+            class="group-del"
+            wx:if="{{group.allDone}}"
+            data-date="{{group.date}}"
+            catchtap="onDeleteGroup"
+          >
+            <image class="group-del-icon" src="{{icon.trash}}" mode="aspectFit" />
+          </view>
+          <!-- 分享整组清单（邀请好友协作） -->
+          <button class="group-share" open-type="share" data-date="{{group.date}}">
+            <image class="group-share-icon" src="{{icon.share}}" mode="aspectFit" />
+            <text>分享</text>
+          </button>
+        </view>
+      </view>
+
+      <view
+        class="card item {{item.is_completed ? 'done' : ''}}"
+        wx:for="{{group.items}}"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindtap="onItemTap"
+      >
+        <view class="item-main">
+          <!-- 总标题：绿色竖条 + 任务名，层级最上 -->
+          <view class="item-title-row">
+            <view class="item-title-bar"></view>
+            <view class="item-name">{{item.itemTitle}}</view>
+          </view>
+          <!-- 子项（物品逐行）：一级页面点击整行即可勾选完成（catchtap 阻止冒泡，不打开详情） -->
+          <view class="item-lines" wx:if="{{item.items.length > 0}}">
+            <view
+              class="item-line {{it.done ? 'done' : ''}}"
+              wx:for="{{item.items}}"
+              wx:for-item="it"
+              wx:key="rowKey"
+              data-id="{{item._id}}"
+              data-index="{{it.rowKey}}"
+              data-done="{{it.done}}"
+              catchtap="onToggleItem"
+            >
+              <text class="item-line-name">{{it.name}}</text>
+              <view class="item-line-check {{it.done ? 'checked' : ''}}">
+                <image wx:if="{{it.done}}" class="item-line-check-icon" src="{{icon.checkWhite}}" />
+              </view>
+            </view>
+          </view>
+          <view class="item-cook" wx:if="{{item.categoryText}}">{{item.categoryText}} · {{item.itemCount}}项 · {{item.timeText}}</view>
+        </view>
+        <!-- 右侧操作区：分享 + 删除 竖向长方形排列（蓝色/红色系与价格笔记页一致） -->
+        <view class="item-actions">
+          <!-- 单条分享：携带该条记录 ID，可自选分享哪条 -->
+          <button class="item-act item-share" open-type="share" data-id="{{item._id}}" data-title="{{item.itemTitle}}" data-content="{{item.content}}">
+            <image class="item-act-icon" src="{{icon.shareWhite}}" mode="aspectFit" />
+            <text class="item-act-text">分享</text>
+          </button>
+          <!-- 单条删除：二次确认后永久删除并刷新列表（与分享同为 button 元素，尺寸保持一致） -->
+          <button class="item-act item-del" data-id="{{item._id}}" catchtap="onCardDelete">
+            <image class="item-act-icon" src="{{icon.trashWhite}}" mode="aspectFit" />
+            <text class="item-act-text">删除</text>
+          </button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{groups.length === 0}}">
+      <image class="empty-icon-img" src="{{icon.bag}}" mode="aspectFit" />
+      <view class="empty-text">{{keyword ? '没有找到相关物品' : '今天还没买菜，点击下方添加'}}</view>
+    </view>
+  </block>
+
+  <!-- 底部固定添加按钮：线条加号图标 + 文字 -->
+  <view class="bottom-bar">
+    <view class="add-bar-btn" bindtap="onAdd">
+      <image class="add-bar-btn-icon" src="{{icon.plusWhite}}" mode="aspectFit" />
+      <text>添加物品</text>
+    </view>
+  </view>
+
+  <!-- 批量添加弹层 · 步骤1：任务标题 + 多行物品（一个任务 = 一条清单记录） -->
+  <view class="sheet-mask" wx:if="{{showAddSheet}}" bindtap="closeAddSheet"></view>
+  <view
+    class="sheet"
+    wx:if="{{showAddSheet}}"
+    style="bottom: {{keyboardHeight ? keyboardHeight + 'px' : 0}}; max-height: {{keyboardHeight ? 'calc(100vh - ' + keyboardHeight + 'px)' : '80vh'}}"
+  >
+    <view class="sheet-title">添加购物任务</view>
+    <view class="batch-tip">先填任务标题，再逐行添加本次要买的物品</view>
+    <!-- 任务总标题：本次购物任务的名称，保存后作为清单记录标题 -->
+    <input
+      class="input task-title-input"
+      placeholder="任务标题（如：去超市购买午餐蔬果）"
+      value="{{taskTitle}}"
+      bindinput="onTaskTitleInput"
+      cursor-spacing="20"
+    />
+    <scroll-view scroll-y class="batch-list">
+      <view class="batch-row" wx:for="{{batchRows}}" wx:key="id">
+        <input
+          class="input batch-input"
+          placeholder="物品名（如：牛奶）"
+          value="{{item.value}}"
+          data-index="{{index}}"
+          bindinput="onBatchInput"
+          cursor-spacing="20"
+          confirm-type="next"
+        />
+        <view class="batch-del" data-index="{{index}}" catchtap="removeRow">
+          <image class="batch-del-icon" src="{{icon.xGray}}" mode="aspectFit" />
+        </view>
+      </view>
+    </scroll-view>
+    <view class="sheet-foot">
+      <view class="add-row-btn" bindtap="addRow">
+        <image class="add-row-btn-icon" src="{{icon.plusBlue}}" mode="aspectFit" />
+        <text>添加一行</text>
+      </view>
+      <view class="btn-primary btn-block batch-save" bindtap="toPreview">下一步：预览（{{validCount}} 项）</view>
+    </view>
+  </view>
+
+  <!-- 批量添加弹层 · 步骤2：预览（物品清单 + 逐项勾选） -->
+  <view class="sheet-mask" wx:if="{{showPreview}}" bindtap="closeAddSheet"></view>
+  <view
+    class="sheet"
+    wx:if="{{showPreview}}"
+    style="bottom: {{keyboardHeight ? keyboardHeight + 'px' : 0}}; max-height: {{keyboardHeight ? 'calc(100vh - ' + keyboardHeight + 'px)' : '80vh'}}"
+  >
+    <view class="sheet-title">确认清单</view>
+    <!-- 任务标题展示：预览/保存均以该标题为一条记录 -->
+    <view class="preview-title">
+      <image class="preview-pin-icon" src="{{icon.pin}}" mode="aspectFit" />
+      {{previewTitle}}
+    </view>
+    <view class="batch-tip">家里已有的可点击勾选，保存后直接记为已完成</view>
+    <scroll-view scroll-y class="batch-list">
+      <view
+        class="preview-row {{item.done ? 'done' : ''}}"
+        wx:for="{{previewRows}}"
+        wx:key="id"
+        data-index="{{index}}"
+        bindtap="onPreviewToggle"
+      >
+        <view class="checkbox {{item.done ? 'checked' : ''}}">
+          <image wx:if="{{item.done}}" class="checkbox-icon" src="{{icon.checkWhite}}" mode="aspectFit" />
+        </view>
+        <view class="preview-name">{{item.name}}</view>
+      </view>
+    </scroll-view>
+    <view class="sheet-foot sheet-actions">
+      <view class="btn-ghost btn-flex" bindtap="backToEdit">
+        <image class="btn-back-icon" src="{{icon.chevronLeft}}" mode="aspectFit" />
+        <text>返回修改</text>
+      </view>
+      <view class="btn-primary btn-flex" bindtap="confirmBatch">
+        <image class="btn-check-icon" src="{{icon.checkWhite}}" mode="aspectFit" />
+        <text>确认添加</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 清单详情弹层：点击任意清单项展示完整记录 -->
+  <view class="sheet-mask" wx:if="{{showDetail}}" bindtap="closeDetail"></view>
+  <view class="sheet" wx:if="{{showDetail}}">
+    <view class="sheet-title">清单详情</view>
+    <view class="detail-body">
+      <view class="detail-name">{{detail.title}}</view>
+      <!-- 任务下物品逐行：每项带完成状态，点击行尾圆圈直接勾选 -->
+      <view class="detail-items" wx:if="{{detail.items.length > 0}}">
+        <view
+          class="detail-item {{item.done ? 'done' : ''}}"
+          wx:for="{{detail.items}}"
+          wx:key="rowKey"
+          data-id="{{detail._id}}"
+          data-index="{{item.rowKey}}"
+          data-done="{{item.done}}"
+          bindtap="onDetailItemToggle"
+        >
+          <view class="detail-item-check {{item.done ? 'checked' : ''}}">
+            <image wx:if="{{item.done}}" class="detail-item-check-icon" src="{{icon.checkWhite}}" mode="aspectFit" />
+          </view>
+          <text class="detail-item-name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="detail-tag-row">
+        <text class="detail-tag {{detail.is_completed ? 'tag-done' : 'tag-todo'}}">{{detail.statusText}}</text>
+        <text class="detail-tag tag-cat" wx:if="{{detail.categoryText}}">{{detail.categoryText}}</text>
+      </view>
+      <view class="detail-row">
+        <view class="detail-label">
+          <image class="detail-label-icon" src="{{icon.clock}}" mode="aspectFit" />
+          <text>添加时间</text>
+        </view>
+        <text class="detail-value">{{detail.timeText}}</text>
+      </view>
+      <view class="detail-row" wx:if="{{detail.completedAtText}}">
+        <view class="detail-label">
+          <image class="detail-label-icon" src="{{icon.check}}" mode="aspectFit" />
+          <text>完成时间</text>
+        </view>
+        <text class="detail-value">{{detail.completedAtText}}</text>
+      </view>
+      <view class="detail-row">
+        <view class="detail-label">
+          <image class="detail-label-icon" src="{{icon.user}}" mode="aspectFit" />
+          <text>添加人</text>
+        </view>
+        <text class="detail-value">{{detail.creatorName || '我'}}</text>
+      </view>
+      <view class="detail-row" wx:if="{{detail.membersText}}">
+        <view class="detail-label">
+          <image class="detail-label-icon" src="{{icon.users}}" mode="aspectFit" />
+          <text>协作者</text>
+        </view>
+        <text class="detail-value">{{detail.membersText}}</text>
+      </view>
+    </view>
+    <view class="sheet-foot sheet-actions">
+      <view class="btn-ghost btn-flex" bindtap="closeDetail">关闭</view>
+      <view class="btn-primary btn-flex" data-id="{{detail._id}}" data-completed="{{detail.is_completed}}" bindtap="onDetailToggle">
+        <image class="btn-check-icon" src="{{icon.checkWhite}}"/>{{detail.is_completed ? '标记未完成' : '标记已完成'}}
+      </view>
+    </view>
+    <!-- 删除入口：危险操作移入详情弹层底部，二次确认后删除，卡片上不再与分享并排 -->
+    <view class="detail-delete" data-id="{{detail._id}}" catchtap="onDetailDelete">
+      <image class="detail-delete-icon" src="{{icon.trashRed}}" mode="aspectFit" />
+      <text>删除这条记录</text>
+    </view>
+  </view>
+</view>

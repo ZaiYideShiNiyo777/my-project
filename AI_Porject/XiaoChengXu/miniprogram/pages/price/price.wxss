@@ -1,0 +1,371 @@
+page {
+  background-color: #f0f5ff; /* 页面蓝白底：与蓝色金融卡片系统一（参考 Meela 银行 UI 白色背景） */
+}
+
+.page {
+  padding-bottom: 160rpx;
+}
+
+/* ---------- 顶部统计 + 邀请按钮 ---------- */
+.stat-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32rpx 24rpx 8rpx;
+}
+
+.stat-num {
+  font-size: 64rpx;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: var(--text-sub);
+  margin-left: 12rpx;
+}
+
+/* 总价统计：所有商品当前价格合计，直观可见 */
+.stat-total {
+  display: flex;
+  align-items: baseline;
+  background: var(--primary-light);
+  border-radius: 32rpx;
+  padding: 12rpx 24rpx;
+}
+
+.stat-total-label {
+  font-size: 24rpx;
+  color: var(--primary);
+  margin-right: 10rpx;
+  font-weight: 600;
+}
+
+.stat-total-num {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #e64340;
+}
+
+/* ---------- 商品卡片：白色背景改为浅蓝卡片 ---------- */
+.price-card {
+  margin: 16rpx 24rpx;
+  background: var(--primary-light);
+  border: 1rpx solid rgba(30, 94, 255, 0.2);
+}
+
+.price-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.price-left {
+  flex: 1;
+  overflow: hidden;
+}
+
+.price-name {
+  font-size: 34rpx;
+  font-weight: 600;
+}
+
+.price-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--text-sub);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 平台标签：线条图标 + 文字 */
+.price-platform {
+  display: flex;
+  align-items: center;
+}
+
+.price-platform-icon {
+  width: 22rpx;
+  height: 22rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.price-last {
+  margin-top: 4rpx;
+}
+
+.price-first {
+  margin-top: 4rpx;
+}
+
+.price-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 20rpx;
+}
+
+.price-current {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #e64340;
+}
+
+.price-arrow {
+  margin-top: 6rpx;
+  padding: 8rpx 16rpx; /* 扩大点击区：点箭头查看/收起价格历史 */
+}
+
+.price-arrow-icon {
+  width: 26rpx;
+  height: 26rpx;
+  display: block;
+}
+
+/* ---------- 操作按钮 ---------- */
+.price-ops {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16rpx;
+  margin-top: 16rpx;
+  border-top: 1rpx solid rgba(30, 94, 255, 0.15);
+}
+
+.op-btn {
+  font-size: 24rpx;
+  padding: 8rpx 28rpx;
+  border-radius: 28rpx;
+  margin-left: 16rpx;
+  border: none;
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 按钮内线条图标：与文字垂直居中 */
+.op-btn-icon {
+  width: 26rpx;
+  height: 26rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.op-btn::after {
+  border: none;
+}
+
+/* 分享按钮（每条商品后主动邀请协作） */
+.op-share {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.op-share:active {
+  opacity: 0.85;
+}
+
+.op-del {
+  background: #fdeaea;
+  color: var(--danger);
+}
+
+/* ---------- 价格历史时间线 ---------- */
+.history {
+  margin-top: 20rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed rgba(30, 94, 255, 0.3);
+}
+
+.history-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 10rpx 0;
+}
+
+.history-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  margin: 12rpx 16rpx 0 4rpx;
+  flex-shrink: 0;
+}
+
+.history-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.history-price {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+}
+
+/* 价格变化箭头：线条右箭头图标 */
+.history-arrow {
+  width: 22rpx;
+  height: 22rpx;
+  opacity: 0.6;
+}
+
+.history-time {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-top: 2rpx;
+}
+
+.history-empty {
+  padding: 20rpx 0;
+  text-align: center;
+}
+
+/* 空状态图标（线条风） */
+.empty-icon-img {
+  width: 96rpx;
+  height: 96rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  color: var(--text-sub);
+  font-size: 26rpx;
+}
+
+/* ---------- FAB：新增商品入口（带文字，明确可点） ---------- */
+.fab {
+  position: fixed;
+  right: 32rpx;
+  bottom: calc(160rpx + env(safe-area-inset-bottom));
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 30rpx;
+  height: 88rpx;
+  border-radius: 44rpx;
+  box-shadow: 0 8rpx 24rpx rgba(30, 94, 255, 0.35);
+  z-index: 99;
+}
+
+.fab-icon {
+  width: 36rpx;
+  height: 36rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+.fab-text {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.fab:active {
+  background: var(--primary-dark);
+  transform: scale(0.96);
+}
+
+/* 空状态添加按钮：首次进入时明确的新增入口 */
+.empty-add-btn {
+  margin-top: 32rpx;
+  background: var(--primary);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 20rpx 56rpx;
+  border-radius: 44rpx;
+  box-shadow: 0 6rpx 20rpx rgba(30, 94, 255, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+/* 空状态添加按钮：白色线条加号图标 */
+.empty-add-btn-icon {
+  width: 30rpx;
+  height: 30rpx;
+}
+
+.empty-add-btn:active {
+  background: var(--primary-dark);
+}
+
+/* ---------- 表单弹层 ---------- */
+.form-body {
+  padding-bottom: 8rpx;
+  min-height: 0; /* 配合全局 .sheet 固定高度：flex 分配剩余空间，字段完整可见，保存按钮不被挤出 */
+}
+
+.form-input {
+  margin-bottom: 20rpx;
+  width: 100%;
+}
+
+.form-required {
+  font-size: 20rpx;
+  color: var(--text-sub);
+  margin-bottom: 16rpx;
+}
+
+.req-star {
+  color: var(--danger);
+}
+
+.form-save {
+  margin-top: 8rpx;
+}
+
+/* 主按钮内白色对勾图标（线条风） */
+.btn-check-icon {
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 8rpx;
+  display: inline-block;
+  vertical-align: -5rpx;
+}
+
+/* ---------- 修改价格弹层：大号价格输入，只输一个数字 ---------- */
+.edit-price-name {
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--text-main);
+  word-break: break-all;
+}
+
+.edit-price-current {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--text-sub);
+  margin: 8rpx 0 24rpx;
+}
+
+.edit-price-wrap {
+  display: flex;
+  align-items: center;
+  background: #f2f3f5;
+  border: 1rpx solid rgba(30, 94, 255, 0.3);
+  border-radius: 20rpx;
+  padding: 0 24rpx;
+}
+
+.edit-price-symbol {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 12rpx;
+}
+
+.edit-price-input {
+  flex: 1;
+  height: 104rpx;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: var(--text-main);
+}

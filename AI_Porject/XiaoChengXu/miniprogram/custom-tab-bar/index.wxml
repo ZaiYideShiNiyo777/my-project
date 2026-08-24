@@ -1,0 +1,16 @@
+<view class="tab-bar" wx:if="{{!hidden}}">
+  <view
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    wx:for="{{list}}"
+    wx:key="pagePath"
+    data-index="{{index}}"
+    data-path="{{item.pagePath}}"
+    bindtap="switchTab"
+  >
+    <!-- 选中/未选中两套线条图标，跟随状态切换 -->
+    <image class="tab-icon" src="{{selected === index ? item.iconActive : item.icon}}" mode="aspectFit" />
+    <view class="tab-text">{{item.text}}</view>
+    <!-- 选中指示：图标下方小圆点，简洁明了（替代胶囊背景） -->
+    <view class="tab-dot {{selected === index ? 'show' : ''}}"></view>
+  </view>
+</view>

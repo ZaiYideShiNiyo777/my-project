@@ -1,0 +1,104 @@
+<view class="page">
+  <!-- 用户卡片 -->
+  <view class="card user-card" bindtap="onNicknameTap">
+    <view class="user-avatar">{{nickname.charAt(0)}}</view>
+    <view class="user-info">
+      <view class="user-name">{{nickname}}</view>
+      <view class="user-tip">点击修改昵称，将展示在协作清单中</view>
+    </view>
+    <image class="user-edit" src="{{icon.pencil}}"/>
+  </view>
+
+  <!-- 浮窗指引 -->
+  <view class="card guide-card">
+    <view class="guide-title">
+      <image class="guide-title-icon" src="{{icon.bulb}}"/>浮窗指引
+    </view>
+    <view class="guide-text">点击右上角 "..." → 选择 "浮窗"，即可快速返回小程序继续记录</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-dot"></view>
+  </view>
+
+  <block wx:else>
+    <!-- 受邀人管理：按 购物清单 / 家庭备忘录 / 价格笔记 / 饮食计划 分类展示 -->
+    <view class="section-title">
+      <image class="section-title-icon" src="{{icon.users}}"/>我的协作邀请
+    </view>
+    <view class="card invite-group" wx:for="{{inviteGroups}}" wx:key="type" wx:for-item="group">
+      <view class="ig-head">
+        <view class="ig-title">
+          <image class="ig-title-icon" src="{{group.typeIcon}}"/>{{group.typeLabel}}
+        </view>
+        <text class="ig-count" wx:if="{{group.invites.length > 0}}">{{group.invites.length}} 人</text>
+      </view>
+
+      <view class="ig-empty" wx:if="{{group.invites.length === 0}}">
+        暂无已接受的协作者，在对应页面点「分享」邀请微信好友
+      </view>
+
+      <view
+        class="ig-item"
+        wx:for="{{group.invites}}"
+        wx:key="_id"
+        wx:for-item="inv"
+      >
+        <view class="ig-avatar">{{inv.inviteeName ? inv.inviteeName.charAt(0) : '?'}}</view>
+        <view class="ig-info">
+          <view class="ig-name">{{inv.inviteeName}}</view>
+          <view class="ig-time">{{inv.timeText}}</view>
+        </view>
+        <view class="ig-status {{inv.statusClass}}">{{inv.statusText}}</view>
+        <view class="ig-remove" data-id="{{inv._id}}" catchtap="onRemoveInvite">移除</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 订阅设置：双时段可选（早上 6:00 / 下午 18:00，可同时勾选） -->
+  <view class="card setting-card">
+    <view class="setting-head">
+      <view class="setting-label">
+        <image class="setting-label-icon" src="{{icon.bell}}"/>每日待办提醒
+      </view>
+      <view class="setting-desc">未完成待办（购物清单 + 家庭备忘录）将在所选时段推送提醒</view>
+    </view>
+    <view class="setting-options">
+      <view class="setting-option">
+        <view class="option-info">
+          <view class="option-time">早上 6:00</view>
+          <view class="option-tip">起床后查看今日待办</view>
+        </view>
+        <switch checked="{{remindTimes.morning}}" data-slot="morning" bindchange="onRemindTimeChange" color="#1E5EFF" />
+      </view>
+      <view class="setting-option">
+        <view class="option-info">
+          <view class="option-time">下午 18:00</view>
+          <view class="option-tip">下班后处理未完成事项</view>
+        </view>
+        <switch checked="{{remindTimes.evening}}" data-slot="evening" bindchange="onRemindTimeChange" color="#1E5EFF" />
+      </view>
+    </view>
+    <view class="setting-note">提示：微信订阅消息每次授权仅推送一次，建议经常回来重新勾选开启</view>
+  </view>
+
+  <!-- 昵称编辑弹层：内容少，用 sheet-sm 自适应高度，避免大片留白 -->
+  <view class="sheet-mask" wx:if="{{showNicknameSheet}}" bindtap="closeNicknameSheet"></view>
+  <view class="sheet sheet-sm" wx:if="{{showNicknameSheet}}">
+    <view class="sheet-title">修改昵称</view>
+    <view class="nickname-tip">昵称将展示在协作清单中，方便家人识别</view>
+    <input
+      class="input nickname-input"
+      placeholder="输入你的昵称"
+      value="{{nicknameInput}}"
+      bindinput="onNicknameInput"
+      maxlength="12"
+      confirm-type="done"
+      bindconfirm="confirmNickname"
+    />
+    <view class="sheet-actions">
+      <view class="btn-ghost btn-flex" bindtap="closeNicknameSheet">取消</view>
+      <view class="btn-primary btn-flex" bindtap="confirmNickname">保存</view>
+    </view>
+  </view>
+</view>

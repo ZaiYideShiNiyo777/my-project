@@ -1,0 +1,61 @@
+.tab-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #ffffff;
+  display: flex;
+  padding: 10rpx 8rpx calc(10rpx + env(safe-area-inset-bottom));
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.08);
+  border-top: 1rpx solid #f0f1f3; /* 与页面内容分隔，层次分明 */
+  z-index: 999;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 92rpx;
+  position: relative;
+}
+
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  transition: transform 0.2s ease;
+}
+
+.tab-text {
+  font-size: 20rpx;
+  color: #9aa0a6;
+  margin-top: 4rpx;
+  line-height: 1.2;
+  transition: color 0.2s ease;
+}
+
+.tab-item.active .tab-text {
+  color: #1e5eff;
+  font-weight: 600;
+}
+
+/* 选中指示：图标正下方 6rpx 蓝色小圆点，默认隐藏、选中淡入（简洁明了，替代胶囊背景） */
+.tab-dot {
+  position: absolute;
+  bottom: 6rpx;
+  left: 50%;
+  width: 8rpx;
+  height: 8rpx;
+  margin-left: -4rpx;
+  border-radius: 50%;
+  background: #1e5eff;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.tab-dot.show {
+  opacity: 1;
+  transform: scale(1);
+}

@@ -1,0 +1,132 @@
+<view class="page">
+  <!-- 顶部：家人/宠物 分段控件 -->
+  <view class="segmented">
+    <view
+      class="segmented-item {{tag === 'family' ? 'active' : ''}}"
+      data-tag="family"
+      bindtap="onTagChange"
+    >
+      <image class="seg-item-icon" src="{{tag === 'family' ? icon.familyBlue : icon.familyGray}}"/>家人
+    </view>
+    <view
+      class="segmented-item {{tag === 'pet' ? 'active' : ''}}"
+      data-tag="pet"
+      bindtap="onTagChange"
+    >
+      <image class="seg-item-icon" src="{{tag === 'pet' ? icon.petBlue : icon.petGray}}"/>宠物
+    </view>
+  </view>
+
+  <!-- 分组方式切换（按日期/按标题）+ 邀请按钮 -->
+  <view class="memo-toolbar">
+    <view class="group-switch">
+      <view
+        class="gs-item {{groupBy === 'date' ? 'active' : ''}}"
+        data-by="date"
+        bindtap="onGroupByChange"
+      >
+        <image class="gs-item-icon" src="{{groupBy === 'date' ? icon.calendarBlue : icon.calendarGray}}"/>按日期
+      </view>
+      <view
+        class="gs-item {{groupBy === 'title' ? 'active' : ''}}"
+        data-by="title"
+        bindtap="onGroupByChange"
+      >
+        <image class="gs-item-icon" src="{{groupBy === 'title' ? icon.tagBlue : icon.tagGray}}"/>按标题
+      </view>
+    </view>
+    <button class="invite-btn" open-type="share">
+      <image class="invite-btn-icon" src="{{icon.share}}"/>邀请
+    </button>
+  </view>
+
+  <!-- 时间线：分组展示 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <view class="loading-dot"></view>
+  </view>
+
+  <view wx:else class="timeline">
+    <block wx:for="{{groups}}" wx:key="key" wx:for-item="group">
+      <!-- 组头：日期 或 标题 -->
+      <view class="group-title">
+        <view class="group-dot"></view>
+        {{group.key}}
+        <text class="group-count">{{group.items.length}} 条</text>
+      </view>
+
+      <!-- 组内消息：长按弹出操作面板 -->
+      <view
+        class="memo-item"
+        wx:for="{{group.items}}"
+        wx:for-item="item"
+        wx:key="_id"
+        data-id="{{item._id}}"
+        bindlongpress="onLongPress"
+      >
+        <view class="memo-content {{item.isMine ? 'mine' : ''}}">
+          <view class="bubble {{item.isMine ? 'mine' : ''}} {{item.is_completed ? 'done' : ''}}">
+            <view class="bubble-title" wx:if="{{item.title}}">
+              <image class="bubble-title-icon" src="{{icon.pin}}"/>{{item.title}}
+            </view>
+            <view class="bubble-text">{{item.content}}</view>
+          </view>
+          <!-- 完整信息：标签 / 发送人 / 时间 -->
+          <view class="bubble-meta">
+            <text class="bubble-tag">{{item.tagText}}</text>
+            <text class="bubble-author">{{item.authorText}}</text>
+            <text class="bubble-time">{{item.timeText}}</text>
+          </view>
+        </view>
+      </view>
+    </block>
+
+    <!-- 空状态 -->
+    <view class="empty" wx:if="{{list.length === 0}}">
+      <image class="empty-icon-img" src="{{tag === 'family' ? icon.familyGray : icon.petGray}}"/>
+      <view class="empty-text">{{tag === 'family' ? '还没有家人备忘，发一条吧' : '还没有宠物备忘，发一条吧'}}</view>
+    </view>
+
+    <view class="longpress-tip" wx:if="{{list.length > 0}}">长按消息可复制 / 标记完成 / 删除</view>
+  </view>
+
+  <!-- 底部输入区：标题（可展开）+ 引用标题 + 内容 + 发送 -->
+  <!-- 键盘弹起时整体上移到键盘上方，发送按钮不被遮挡 -->
+  <view
+    class="bottom-bar"
+    style="bottom: {{keyboardHeight ? keyboardHeight + 'px' : 'calc(112rpx + env(safe-area-inset-bottom))'}}"
+  >
+    <!-- 引用标题提示条 -->
+    <view class="refer-row" wx:if="{{referencedTitle}}">
+      <image class="refer-pin-icon" src="{{icon.pin}}"/>
+      <text class="refer-text">引用：{{referencedTitle}}</text>
+      <view class="refer-cancel" catchtap="cancelRefer">
+        <image class="refer-x-icon" src="{{icon.x}}"/>取消
+      </view>
+    </view>
+    <view class="title-row" wx:if="{{showTitleInput}}">
+      <input
+        class="input title-input"
+        placeholder="备忘标题（可选，如：周末采购）"
+        value="{{titleText}}"
+        bindinput="onTitleInput"
+      />
+    </view>
+    <view class="input-row">
+      <view class="title-toggle {{showTitleInput ? 'on' : ''}}" bindtap="toggleTitleInput">
+        <image class="title-toggle-icon" src="{{icon.pin}}"/>
+      </view>
+      <view class="title-toggle {{referencedTitle ? 'on' : ''}}" bindtap="onReferTap">
+        <image class="title-toggle-icon" src="{{icon.attach}}"/>
+      </view>
+      <input
+        class="input bottom-input"
+        placeholder="{{tag === 'family' ? '给家人的备忘…' : '关于宠物的备忘…'}}"
+        value="{{inputText}}"
+        bindinput="onInput"
+        confirm-type="send"
+        bindconfirm="onSend"
+      />
+      <view class="btn-primary send-btn" bindtap="onSend">发送</view>
+    </view>
+  </view>
+</view>

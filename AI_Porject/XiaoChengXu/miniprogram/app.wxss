@@ -1,0 +1,386 @@
+/* 全局样式 生活胶囊 */
+/* 配色体系（明暗关系）——参考「Meela 银行/钱包金融 UI Kit」蓝色主题 + 白色背景：
+   主色 --primary 宝蓝（按钮/选中/强调）；按压变 --primary-dark 更暗 → 点击反馈明显
+   背景 --bg-page 蓝白（#f0f5ff）与卡片纯白形成层级；遮罩 --mask 半透明压暗背景
+   文字主色 #1f2329（正文）> 次色 #8a919f（说明）> 弱化 #b6bcc6（时间/占位）
+   强调色：橙色 #ff6b35（热量）、红色 #e64340（价格/危险）
+*/
+page {
+  --primary: #1E5EFF;
+  --primary-dark: #1748CC; /* 主按钮按压态：明显变暗 */
+  --primary-light: #EAF1FF;
+  --danger: #e64340;
+  --text-main: #1f2329;
+  --text-sub: #8a919f;
+  --text-light: #b6bcc6; /* 弱化文字：时间/占位符 */
+  --line: #f0f1f3; /* 分隔线 */
+  --mask: rgba(0, 0, 0, 0.55); /* 遮罩：半透明压暗背景，突出弹层 */
+  --bg-page: #f0f5ff;
+  --bg-card: #ffffff;
+  --radius: 12rpx; /* 全局卡片圆角：统一小圆角（6-12rpx） */
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+/* ---------- 通用卡片 ---------- */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 24rpx;
+  margin: 20rpx 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* ---------- 通用按钮 ---------- */
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  padding: 0 40rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border: none;
+}
+
+.btn-primary::after {
+  border: none;
+}
+
+.btn-primary[disabled] {
+  opacity: 0.5;
+}
+
+/* 按压态：主色变暗，点击反馈清晰 */
+.btn-primary:active {
+  background: var(--primary-dark);
+}
+
+.btn-primary[disabled]:active {
+  background: var(--primary);
+}
+
+/* ---------- 通用输入框 ---------- */
+.input {
+  background: #f2f3f5;
+  border-radius: 40rpx;
+  height: 72rpx;
+  padding: 0 30rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+/* ---------- 空状态 ---------- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 140rpx 0 60rpx;
+}
+
+.empty-icon {
+  font-size: 96rpx;
+  line-height: 1;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  color: var(--text-sub);
+  font-size: 26rpx;
+}
+
+/* ---------- 加载中 ---------- */
+.loading-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading-dot {
+  width: 36rpx;
+  height: 36rpx;
+  border: 4rpx solid rgba(30, 94, 255, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- 半屏弹层（bottom sheet） ---------- */
+/* 弹层打开期间 tabBar 由页面统一隐藏（utils/tabbar.js），遮罩压暗背景、弹层白色亮面突出 */
+.sheet-mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--mask);
+  z-index: 1000;
+}
+
+.sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.12); /* 向上投影：与遮罩/页面拉开层次 */
+  z-index: 1001;
+  padding: 32rpx 32rpx calc(24rpx + env(safe-area-inset-bottom));
+  /* 固定高度是关键：flex 子项（滚动区/页脚）有确定的分配基准。
+     若只用 max-height，弹层高度按内容计算，内容接近/超过上限时（小屏、键盘弹起）
+     滚动区可能溢出被 overflow:hidden 裁切，出现内容不可见或底部按钮被截掉；
+     固定 height 后滚动区 flex:1 永远占据剩余空间、页脚永远可见。
+     键盘弹起时页面内联 max-height（calc(100vh - 键盘高)）会压缩本高度，行为一致。 */
+  height: 80vh;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* 内容超高时仅滚动内部区域，底部操作按钮不被挤出 */
+}
+
+/* 内容少的弹层（自定义输入/昵称等，无内部滚动区）：自适应高度，避免大片留白 */
+.sheet.sheet-sm {
+  height: auto;
+  max-height: 60vh;
+}
+
+/* 弹层内可滚动内容区：占据剩余高度，内部可滚动到底，底部按钮固定可见 */
+/* height: 0 + flex-grow 是关键：弹层用 max-height 而非固定 height 时，
+   仅 flex:1（flex-basis:0%）在部分 webview 中按内容高度解析导致滚动区溢出被裁切；
+   显式 height:0 可保证滚动区在弹层超高时被正确压缩并内部滚动 */
+.sheet-body {
+  flex: 1 1 0;
+  height: 0;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 弹层底部固定操作区（不被滚动区遮挡，键盘弹起时随弹层上移仍可见） */
+.sheet-foot {
+  flex-shrink: 0;
+  padding-top: 20rpx;
+  padding-bottom: calc(4rpx + env(safe-area-inset-bottom));
+}
+
+.sheet-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 24rpx;
+}
+
+/* 弹层底部按钮行（取消 + 主操作） */
+.sheet-actions {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 32rpx;
+}
+
+.sheet-actions .btn-flex {
+  flex: 1;
+}
+
+.btn-ghost {
+  background: #f2f3f5;
+  color: var(--text-main);
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+}
+
+/* 按压态：次按钮变暗，与主按钮按压反馈一致 */
+.btn-ghost:active {
+  background: #e5e6e8;
+}
+
+.btn-primary.btn-block {
+  display: block;
+  width: 100%;
+  height: 84rpx;
+  line-height: 84rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+/* 弹层内输入框间距 */
+.sheet-field {
+  margin-bottom: 20rpx;
+  width: 100%;
+}
+
+/* 弹层内多行输入 */
+.sheet-textarea {
+  width: 100%;
+  min-height: 120rpx;
+  background: #f2f3f5;
+  border-radius: 20rpx;
+  padding: 20rpx 24rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+/* 分类 chips（横向滚动） */
+.chip-bar {
+  display: flex;
+  padding: 4rpx 0 8rpx;
+  margin-top: 8rpx;
+}
+
+.chip {
+  flex-shrink: 0;
+  background: #f2f3f5;
+  color: var(--text-sub);
+  border-radius: 28rpx;
+  font-size: 24rpx;
+  padding: 8rpx 26rpx;
+  margin-right: 14rpx;
+}
+
+.chip.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.chip:active {
+  background: #e5e6e8;
+}
+
+.chip.active:active {
+  background: #d8e5ff;
+}
+
+/* 小组标题 */
+.group-title {
+  padding: 28rpx 32rpx 6rpx;
+  font-size: 24rpx;
+  color: var(--text-sub);
+  display: flex;
+  align-items: center;
+}
+
+.group-title .group-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: var(--primary);
+  margin-right: 12rpx;
+}
+
+/* ---------- 标签（分段控件） ---------- */
+.segmented {
+  display: flex;
+  background: #eef0f2;
+  border-radius: 40rpx;
+  padding: 6rpx;
+  margin: 20rpx 24rpx;
+}
+
+.segmented-item {
+  flex: 1;
+  text-align: center;
+  height: 64rpx;
+  line-height: 64rpx;
+  font-size: 28rpx;
+  color: var(--text-sub);
+  border-radius: 36rpx;
+  transition: all 0.2s;
+}
+
+.segmented-item.active {
+  background: #fff;
+  color: var(--primary);
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- 协作者头像堆叠 ---------- */
+.member-stack {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+}
+.member-avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 22rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3rpx solid #fff;
+  margin-left: -12rpx;
+  box-sizing: border-box;
+}
+
+.member-avatar:first-child {
+  margin-left: 0;
+}
+
+/* ---------- 页面内邀请按钮（购物/备忘/价格页通用） ---------- */
+.invite-btn {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  height: 56rpx;
+  line-height: 56rpx;
+  padding: 0 24rpx;
+  margin: 0 0 0 16rpx;
+  flex-shrink: 0;
+  border: none;
+  box-sizing: border-box;
+}
+
+.invite-btn::after {
+  border: none;
+}
+
+.invite-btn:active {
+  opacity: 0.85;
+}
+
+/* 购物页顶部右侧：头像堆叠 + 邀请按钮 */
+.member-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 备忘页工具栏：分组切换 + 邀请按钮 */
+.memo-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+  margin-top: 16rpx;
+}
+
+.memo-toolbar .group-switch {
+  flex: 1;
+  margin: 0;
+}
+
+/* 价格页顶部统计 + 邀请按钮 */
+.stat-left {
+  display: flex;
+  align-items: baseline;
+}

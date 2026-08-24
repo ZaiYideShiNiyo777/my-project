@@ -1,0 +1,24 @@
+# ---------- 依赖与构建产物 ----------
+node_modules/
+dist/
+
+# ---------- 本地工具与环境（不纳入版本库） ----------
+tools/
+.qoder-cn/
+.aicoding-chat-workspace
+
+# ---------- 微信开发者工具个人配置 ----------
+project.private.config.json
+
+# ---------- 嵌套 Git 仓库（portfolio 独立版本库，不并入） ----------
+AI_Porject/Resume/portfolio/
+
+# ---------- 根目录调试截图 ----------
+/check_*.png
+/projects_*.png
+/meela_ref.jpg
+
+# ---------- 日志与系统文件 ----------
+*.log
+.DS_Store
+Thumbs.db
