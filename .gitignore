@@ -10,8 +10,9 @@ tools/
 # ---------- 微信开发者工具个人配置 ----------
 project.private.config.json
 
-# ---------- 嵌套 Git 仓库（portfolio 独立版本库，不并入） ----------
+# ---------- 嵌套 Git 仓库（portfolio、stock-analyzer-app 独立版本库，不并入） ----------
 AI_Porject/Resume/portfolio/
+AI_Porject/stock-analyzer-app/
 
 # ---------- 根目录调试截图 ----------
 /check_*.png

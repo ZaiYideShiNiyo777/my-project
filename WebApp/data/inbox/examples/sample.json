@@ -1,0 +1,14 @@
+{
+  "_comment": "消息投递格式示例：将 JSON 文件放入 data/inbox/ 并 push 到 Git 仓库，抓取器 git pull 后自动入库。source_url 唯一用于增量去重；domain 必须命中 trusted_sources 白名单；credibility_score 由后端三级过滤自动计算，低于 0.6 拒绝入库。",
+  "items": [
+    {
+      "title": "示例：某权威媒体发布行业观察",
+      "summary": "这是一条用于演示 Git 中转投递格式的示例消息，正文完整、来源可考。",
+      "content": "<p>这是清洗前的正文（支持 HTML），抓取管道会先做正文清洗，再复用 credibility.py 的三级过滤计算综合可信度。</p>",
+      "source_url": "https://www.gov.cn/news/scraper-demo-001",
+      "domain": "gov.cn",
+      "category_ids": [101],
+      "publish_time": "2026-08-27T12:00:00+08:00"
+    }
+  ]
+}

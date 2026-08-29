@@ -1,0 +1,34 @@
+# 依赖
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 构建产物
+frontend/dist/
+*.log
+
+# 环境变量（含数据库密码，不入库）
+.env
+.env.local
+.env.*.local
+
+# IDE / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docker
+pgdata/
+
+# 本地临时 SQLite 验证库
+backend/dev.db
+backend/dev.db-journal
+backend/dev.db-wal
+backend/dev.db-shm
+backend/test_scraper*.db
+
+# 验证截图归档（本地保留，不入库）
+screenshots_archive/
