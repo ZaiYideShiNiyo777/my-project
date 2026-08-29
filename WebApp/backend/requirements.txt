@@ -8,3 +8,6 @@ pydantic-settings==2.3.4
 # 实时抓取（任务 3）
 httpx==0.27.0
 apscheduler==3.10.4
+
+# 微信云托管内置 MySQL 驱动（生产）
+pymysql==1.2.0

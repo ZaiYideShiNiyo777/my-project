@@ -1,7 +1,8 @@
 import axios from "axios";
 
 export const http = axios.create({
-  baseURL: "/api",
+  // 生产构建通过 VITE_API_BASE 注入后端公网域名（微信云托管）；开发环境走 vite 代理 /api
+  baseURL: import.meta.env.VITE_API_BASE || "/api",
   timeout: 8000,
 });
 
